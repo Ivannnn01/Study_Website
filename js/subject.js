@@ -1,4 +1,4 @@
-﻿document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', () => {
   const params    = new URLSearchParams(window.location.search);
   const subjectId = params.get('id');
   if (!subjectId) { window.location.href = 'index.html'; return; }
@@ -8,9 +8,9 @@
 
   const isGP = isGPSubject(subject);
 
-  document.title = `${subject.name} â€” StudySpace`;
+  document.title = `${subject.name} \u2014 StudySpace`;
   document.getElementById('subject-title').textContent     = subject.name;
-  document.getElementById('subject-icon-display').textContent = subject.icon || 'ðŸ“š';
+  document.getElementById('subject-icon-display').textContent = subject.icon || '\uD83D\uDCDA';
 
   if (isGP) {
     document.getElementById('tabBtn-syllabus').innerHTML = `
@@ -27,7 +27,7 @@
     const lbTitle = document.getElementById('leaderboard-tab-title');
     const lbDesc  = document.getElementById('leaderboard-tab-desc');
     if (lbTitle) lbTitle.textContent = 'Topics Done';
-    if (lbDesc)  lbDesc.textContent  = 'Topics are ranked by how many practice papers covered them. Use this to track which areas you have practised the most. ðŸ—‚ï¸';
+    if (lbDesc)  lbDesc.textContent  = 'Topics are ranked by how many practice papers covered them. Use this to track which areas you have practised the most. \uD83D\uDDC2\uFE0F';
   }
 
   function refreshSubject() {
@@ -63,16 +63,16 @@
     const bestPct  = papers.length ? Math.max(...papers.map(p => p.percentage)) : null;
     const latest   = papers.length ? [...papers].sort((a, b) => b.created - a.created)[0].grade : null;
 
-    document.getElementById('stat-chapter-count').textContent = isGP ? (getGPTopics(subjectId).length || 'â€”') : chapters.length;
+    document.getElementById('stat-chapter-count').textContent = isGP ? (getGPTopics(subjectId).length || '\u2014') : chapters.length;
     document.getElementById('stat-paper-count').textContent   = papers.length;
-    document.getElementById('stat-avg-score').textContent     = avgPct !== null ? avgPct + '%' : 'â€”';
-    document.getElementById('stat-best-score').textContent    = bestPct !== null ? bestPct + '%' : 'â€”';
-    document.getElementById('stat-latest-grade').textContent  = latest || 'â€”';
+    document.getElementById('stat-avg-score').textContent     = avgPct !== null ? avgPct + '%' : '\u2014';
+    document.getElementById('stat-best-score').textContent    = bestPct !== null ? bestPct + '%' : '\u2014';
+    document.getElementById('stat-latest-grade').textContent  = latest || '\u2014';
     if (latest) document.getElementById('stat-latest-grade').style.color = getGradeColor(latest);
 
     if (isGP) {
       document.getElementById('stat-chapter-count').closest('.stat-card').querySelector('.stat-card-label').textContent = 'Topics Done';
-      document.getElementById('stat-chapter-count').closest('.stat-card').querySelector('.stat-card-icon').textContent  = 'ðŸ—‚ï¸';
+      document.getElementById('stat-chapter-count').closest('.stat-card').querySelector('.stat-card-icon').textContent  = '\uD83D\uDDC2\uFE0F';
     }
   }
 
@@ -200,7 +200,7 @@
 
     row.innerHTML = `
       <input type="number" id="add-ch-num" min="1" value="${nextNum}" style="width:70px;flex-shrink:0" placeholder="#">
-      <input type="text" id="add-ch-name" placeholder="Chapter nameâ€¦" style="flex:1">
+      <input type="text" id="add-ch-name" placeholder="Chapter name\u2026" style="flex:1">
       <button class="btn btn-primary btn-sm" id="btn-add-chapter">
         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Add
@@ -318,7 +318,7 @@
           <td class="paper-score-cell">${paper.score} / ${paper.total}</td>
           <td class="paper-percent-cell" style="color:${getGradeColor(paper.grade)}">${paper.percentage}%</td>
           <td><span class="grade-badge grade-${paper.grade}">${paper.grade}</span></td>
-          <td class="paper-chapters-cell">${tagHtml || '<span style="color:var(--text-muted);font-size:0.8rem">â€”</span>'}</td>
+          <td class="paper-chapters-cell">${tagHtml || '<span style="color:var(--text-muted);font-size:0.8rem">\u2014</span>'}</td>
           <td class="paper-actions-cell">
             <button class="delete-paper-btn" data-id="${paper.id}" title="Delete paper">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
@@ -371,7 +371,7 @@
       scorePreviewPct.style.color = getGradeColor(grade);
       document.getElementById('score-preview-bar').style.width = Math.min(pct, 100) + '%';
     } else {
-      scorePreviewPct.textContent = 'â€”';
+      scorePreviewPct.textContent = '\u2014';
       scorePreviewGrade.innerHTML = '';
       document.getElementById('score-preview-bar').style.width = '0%';
     }
@@ -380,11 +380,11 @@
   paperScoreInput.addEventListener('input', updateScorePreview);
   paperTotalInput.addEventListener('input', updateScorePreview);
 
-  document.getElementById('btn-save-paper').textContent = isGP ? 'Next: Add Topics â†’' : 'Next: Tag Chapters â†’';
+  document.getElementById('btn-save-paper').textContent = isGP ? 'Next: Add Topics \u2192' : 'Next: Tag Chapters \u2192';
 
   document.getElementById('btn-add-paper').addEventListener('click', () => {
     paperNameInput.value = ''; paperScoreInput.value = ''; paperTotalInput.value = '';
-    scorePreviewPct.textContent = 'â€”'; scorePreviewGrade.innerHTML = '';
+    scorePreviewPct.textContent = '\u2014'; scorePreviewGrade.innerHTML = '';
     document.getElementById('score-preview-bar').style.width = '0%';
     openModal('modal-add-paper');
     setTimeout(() => paperNameInput.focus(), 150);
@@ -505,7 +505,7 @@
     lbList.innerHTML = '';
 
     if (ranked.length === 0) {
-      lbList.innerHTML = `<div class="lb-empty"><div class="lb-empty-icon">ðŸ“Š</div><p class="text-muted">No data yet. Add practice papers and tag difficult chapters to see your weakness leaderboard.</p></div>`;
+      lbList.innerHTML = `<div class="lb-empty"><div class="lb-empty-icon">\uD83D\uDCCA</div><p class="text-muted">No data yet. Add practice papers and tag difficult chapters to see your weakness leaderboard.</p></div>`;
       return;
     }
 
@@ -542,7 +542,7 @@
     lbList.innerHTML = '';
 
     if (topics.length === 0) {
-      lbList.innerHTML = `<div class="lb-empty"><div class="lb-empty-icon">ðŸ—‚ï¸</div><p class="text-muted">No topics yet. Add practice papers and tag the topics they cover.</p></div>`;
+      lbList.innerHTML = `<div class="lb-empty"><div class="lb-empty-icon">\uD83D\uDDC2\uFE0F</div><p class="text-muted">No topics yet. Add practice papers and tag the topics they cover.</p></div>`;
       return;
     }
 
