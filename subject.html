@@ -1,0 +1,439 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Subject — StudySpace</title>
+  <meta name="description" content="Manage your subject syllabus, track practice papers with SG A-level grading, and identify weak chapters." />
+  <link rel="stylesheet" href="css/global.css" />
+  <link rel="stylesheet" href="css/home.css" />
+  <link rel="stylesheet" href="css/subject.css" />
+</head>
+<body>
+<div class="page-wrapper">
+
+  
+  <nav class="topnav" role="navigation" aria-label="Main navigation">
+    <div class="topnav-inner">
+      <a href="home.html" class="nav-brand" style="text-decoration:none">
+        <div class="nav-logo" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+          </svg>
+        </div>
+        <span class="nav-brand-name">StudySpace</span>
+      </a>
+
+      <div class="nav-links">
+        <a href="home.html" class="nav-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          Home
+        </a>
+      </div>
+
+      <div class="nav-right">
+        <div class="nav-user-chip">
+          <div class="nav-user-avatar user-initials" aria-hidden="true">U</div>
+          <span class="user-display-name">User</span>
+        </div>
+        <button id="btn-logout" class="btn-logout" type="button" aria-label="Log out">
+          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Logout
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  
+  <main class="subject-page-main" id="main-content">
+
+    
+    <div class="subject-page-header">
+      <a href="home.html" class="back-btn" aria-label="Back to home">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        Back
+      </a>
+
+      <div class="subject-header-info">
+        <span class="subject-header-icon" id="subject-icon-display">📚</span>
+        <h1 id="subject-title">Subject</h1>
+        <div class="subject-header-meta">
+          <span class="meta-chip" id="chip-chapters">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            0 chapters
+          </span>
+          <span class="meta-chip" id="chip-papers">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            0 papers
+          </span>
+        </div>
+      </div>
+    </div>
+
+    
+    <div class="subject-stats-bar">
+      <div class="stat-card">
+        <div class="stat-card-icon">📖</div>
+        <div class="stat-card-value" id="stat-chapter-count">0</div>
+        <div class="stat-card-label">Chapters</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-icon">📄</div>
+        <div class="stat-card-value" id="stat-paper-count">0</div>
+        <div class="stat-card-label">Papers Done</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-icon">📊</div>
+        <div class="stat-card-value" id="stat-avg-score">—</div>
+        <div class="stat-card-label">Average Score</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-icon">🏆</div>
+        <div class="stat-card-value" id="stat-best-score">—</div>
+        <div class="stat-card-label">Best Score</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-icon">🎯</div>
+        <div class="stat-card-value" id="stat-latest-grade">—</div>
+        <div class="stat-card-label">Latest Grade</div>
+      </div>
+    </div>
+
+    
+    <div class="subject-tabs-nav" role="tablist" aria-label="Subject sections">
+      <button class="subject-tab-btn active" data-tab="syllabus" role="tab" aria-selected="true" aria-controls="tab-syllabus" id="tabBtn-syllabus">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+        Syllabus
+      </button>
+      <button class="subject-tab-btn" data-tab="papers" role="tab" aria-selected="false" aria-controls="tab-papers" id="tabBtn-papers">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        Practice Papers
+      </button>
+      <button class="subject-tab-btn" data-tab="leaderboard" role="tab" aria-selected="false" aria-controls="tab-leaderboard" id="tabBtn-leaderboard">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Weak Chapters
+      </button>
+    </div>
+
+    
+    <div class="subject-tab-content active" id="tab-syllabus" role="tabpanel" aria-labelledby="tabBtn-syllabus">
+      <div class="section-header mb-md">
+        <div class="section-title">
+          <h2 id="syllabus-tab-title">Syllabus</h2>
+        </div>
+        
+        <div class="flex gap-sm" id="syllabus-actions" style="align-items:center">
+          <label
+            class="btn btn-secondary btn-sm csv-upload-label"
+            for="csv-upload-input"
+            title="Import chapters from CSV or Excel"
+            style="cursor:pointer;margin:0"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+            Upload CSV / Excel
+          </label>
+          <input type="file" id="csv-upload-input" accept=".csv,.xlsx,.xls" style="display:none" aria-label="Upload CSV or Excel file" />
+
+          
+          <button
+            class="btn-icon csv-format-info-btn"
+            type="button"
+            id="btn-csv-format-info"
+            title="View file format guide"
+            aria-label="View CSV format guide"
+            aria-expanded="false"
+            aria-controls="csv-format-panel"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </button>
+        </div>
+      </div>
+
+      
+      <div class="csv-format-panel" id="csv-format-panel" style="display:none" aria-live="polite">
+        <div class="csv-format-inner">
+          <div class="csv-format-header">
+            <span>📋 File Format Guide</span>
+            <button type="button" class="csv-format-close" id="btn-close-format-panel" aria-label="Close format guide">✕</button>
+          </div>
+          <div class="csv-format-body">
+            <div class="csv-format-columns">
+              <div class="csv-col-card">
+                <div class="csv-col-label">Column A</div>
+                <div class="csv-col-name">Chapter Number</div>
+                <div class="csv-col-desc">A whole number, e.g. <code>1</code>, <code>2</code>, <code>10</code></div>
+              </div>
+              <div class="csv-col-arrow">→</div>
+              <div class="csv-col-card">
+                <div class="csv-col-label">Column B</div>
+                <div class="csv-col-name">Chapter Name</div>
+                <div class="csv-col-desc">Any text, e.g. <code>Introduction to Mechanics</code></div>
+              </div>
+            </div>
+
+            <div class="csv-format-rules">
+              <div class="csv-rule csv-rule-ok">
+                <span class="csv-rule-icon">✓</span>
+                <span><strong>Headers are optional</strong> — the importer auto-detects and skips any row where Column A is not a number. You can include or omit a header row.</span>
+              </div>
+              <div class="csv-rule csv-rule-ok">
+                <span class="csv-rule-icon">✓</span>
+                <span>Both <strong>.csv</strong> and <strong>.xlsx / .xls</strong> (Excel) files are accepted.</span>
+              </div>
+              <div class="csv-rule csv-rule-ok">
+                <span class="csv-rule-icon">✓</span>
+                <span>Chapters will be <strong>sorted by number</strong> after import, regardless of order in the file.</span>
+              </div>
+              <div class="csv-rule csv-rule-warn">
+                <span class="csv-rule-icon">!</span>
+                <span>Excel support requires an <strong>internet connection</strong> (loads the SheetJS library). CSV works fully offline.</span>
+              </div>
+            </div>
+
+            <div class="csv-format-example">
+              <div class="csv-example-title">Example CSV (no header):</div>
+              <pre class="csv-example-pre">1,Introduction to Kinematics
+2,Newton's Laws of Motion
+3,Work, Energy and Power
+10,Electric Fields</pre>
+              <div class="csv-example-title" style="margin-top:var(--space-sm)">Example CSV (with header — also fine):</div>
+              <pre class="csv-example-pre">Chapter Number,Chapter Name
+1,Introduction to Kinematics
+2,Newton's Laws of Motion</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="syllabus-list" id="syllabus-list">
+        
+      </div>
+    </div>
+
+    
+    <div class="subject-tab-content" id="tab-papers" role="tabpanel" aria-labelledby="tabBtn-papers">
+      <div class="section-header mb-md">
+        <div class="section-title">
+          <h2>Practice Papers</h2>
+        </div>
+        <button class="btn btn-primary btn-sm" id="btn-add-paper" type="button">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Paper
+        </button>
+      </div>
+
+      
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:var(--space-md)">
+        <span class="grade-badge grade-A" title="≥70%">A ≥70%</span>
+        <span class="grade-badge grade-B" title="60–69%">B 60–69</span>
+        <span class="grade-badge grade-C" title="55–59%">C 55–59</span>
+        <span class="grade-badge grade-D" title="50–54%">D 50–54</span>
+        <span class="grade-badge grade-E" title="45–49%">E 45–49</span>
+        <span class="grade-badge grade-S" title="40–44%">S 40–44</span>
+        <span class="grade-badge grade-U" title="<40%">U &lt;40%</span>
+      </div>
+
+      <div class="papers-table-wrap">
+        <table class="papers-table" aria-label="Practice papers">
+          <thead>
+            <tr>
+              <th>Paper Name</th>
+              <th>Score</th>
+              <th>%</th>
+              <th>Grade</th>
+              <th id="papers-col-tags">Difficult Chapters</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="papers-tbody">
+            <tr id="papers-empty-row">
+              <td colspan="6">
+                <div class="empty-state">
+                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  <p>No papers yet. Add your first practice paper above.</p>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      
+      <div class="papers-summary-bar" id="papers-summary" style="display:none">
+        <div class="papers-summary-stat">
+          <span class="val" id="summary-count">0</span>
+          <span class="lbl">Papers</span>
+        </div>
+        <div class="papers-summary-stat">
+          <span class="val" id="summary-avg">—</span>
+          <span class="lbl">Average</span>
+        </div>
+        <div class="papers-summary-stat">
+          <span class="val" id="summary-best">—</span>
+          <span class="lbl">Best</span>
+        </div>
+        <div class="papers-summary-stat">
+          <span class="val" id="summary-a-count">0</span>
+          <span class="lbl">A grades</span>
+        </div>
+      </div>
+    </div>
+
+    
+    <div class="subject-tab-content" id="tab-leaderboard" role="tabpanel" aria-labelledby="tabBtn-leaderboard">
+      <div class="section-header mb-md">
+        <div class="section-title">
+          <h2 id="leaderboard-tab-title">Chapter Weakness Leaderboard</h2>
+        </div>
+      </div>
+      <p id="leaderboard-tab-desc" style="color:var(--text-muted);font-size:0.9rem;margin-bottom:var(--space-lg)">
+        Chapters are ranked by how many times you flagged them as difficult across your practice papers.
+        The higher the rank, the more attention that chapter needs. 🎯
+      </p>
+      <div class="leaderboard-list" id="leaderboard-list">
+        
+      </div>
+    </div>
+
+  </main>
+
+  
+  <div class="modal-overlay" id="modal-add-paper" role="dialog" aria-modal="true" aria-labelledby="add-paper-title">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="add-paper-title">Add Practice Paper</h3>
+        <button class="modal-close" onclick="closeModal('modal-add-paper')" aria-label="Close">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="input-paper-name">Paper Name</label>
+          <input type="text" id="input-paper-name" placeholder="e.g. 2023 JJC Paper 1" maxlength="80" />
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-md)">
+          <div class="form-group">
+            <label for="input-paper-score">Marks Obtained</label>
+            <input type="number" id="input-paper-score" placeholder="e.g. 72" min="0" step="0.5" />
+          </div>
+          <div class="form-group">
+            <label for="input-paper-total">Total Marks</label>
+            <input type="number" id="input-paper-total" placeholder="e.g. 100" min="1" step="0.5" />
+          </div>
+        </div>
+
+        
+        <div class="score-preview">
+          <div class="score-preview-info">
+            <span class="score-preview-pct" id="score-preview-pct">—</span>
+            <span id="score-preview-grade"></span>
+          </div>
+          <div style="flex:1">
+            <div class="progress-bar-wrap">
+              <div class="progress-bar-fill" id="score-preview-bar" style="width:0%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="btn-cancel-paper" type="button">Cancel</button>
+        <button class="btn btn-primary" id="btn-save-paper" type="button">
+          Next: Tag Chapters →
+        </button>
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="modal-overlay" id="modal-gp-topics" role="dialog" aria-modal="true" aria-labelledby="gp-topics-title">
+    <div class="modal" style="max-width:460px">
+      <div class="modal-header">
+        <h3 id="gp-topics-title">Tag Topics Covered</h3>
+        <button class="modal-close" onclick="closeModal('modal-gp-topics')" aria-label="Close">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:0.9rem;color:var(--text-secondary);margin-bottom:var(--space-md)">
+          What topic(s) did this paper cover? Enter <strong>1 required</strong> and optionally a <strong>2nd topic</strong>.
+          These will appear in your Topics and Topics Done tabs.
+        </p>
+        <div class="form-group">
+          <label for="gp-topic-1">
+            Topic 1
+            <span style="color:var(--grade-e);font-size:0.75rem;margin-left:4px">required</span>
+          </label>
+          <input type="text" id="gp-topic-1" placeholder="e.g. Environment" maxlength="80" autocomplete="off" />
+        </div>
+        <div class="form-group">
+          <label for="gp-topic-2">
+            Topic 2
+            <span style="color:var(--text-muted);font-size:0.75rem;margin-left:4px">optional</span>
+          </label>
+          <input type="text" id="gp-topic-2" placeholder="e.g. Science &amp; Technology" maxlength="80" autocomplete="off" />
+        </div>
+        <p style="font-size:0.8rem;color:var(--text-muted);margin-top:var(--space-xs)">
+          💡 Topics are free-text. Use consistent naming (e.g. always "Environment" not "Env") for accurate tracking.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost btn-sm" id="btn-cancel-gp-topics" type="button">Cancel Paper</button>
+        <button class="btn btn-secondary" id="btn-skip-gp-topics" type="button">Skip</button>
+        <button class="btn btn-primary" id="btn-save-gp-topics" type="button">Save Paper</button>
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="modal-overlay" id="modal-select-chapters" role="dialog" aria-modal="true" aria-labelledby="select-chapters-title">
+    <div class="modal" style="max-width:520px">
+      <div class="modal-header">
+        <h3 id="select-chapters-title">Tag Difficult Chapters</h3>
+        <button class="modal-close" onclick="closeModal('modal-select-chapters')" aria-label="Close">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:0.9rem;color:var(--text-secondary);margin-bottom:var(--space-md)">
+          Select up to <strong>3 chapters</strong> you found most difficult or made the most mistakes in.
+        </p>
+        <div class="chapters-selector" id="chapters-selector">
+          
+        </div>
+        <p class="selection-hint" id="selection-hint">0 / 3 chapters selected</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost btn-sm" id="btn-cancel-chapters" type="button">Cancel Paper</button>
+        <button class="btn btn-secondary" id="btn-skip-chapters" type="button">Skip</button>
+        <button class="btn btn-primary" id="btn-save-chapters" type="button">Save Paper</button>
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="toast-container" aria-live="polite" aria-label="Notifications"></div>
+
+</div>
+
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<script src="js/data.js"></script>
+<script src="js/subject.js"></script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const infoBtn = document.getElementById('btn-csv-format-info');
+    const panel   = document.getElementById('csv-format-panel');
+    const closeBtn= document.getElementById('btn-close-format-panel');
+    if (infoBtn && panel) {
+      infoBtn.addEventListener('click', () => {
+        const isOpen = panel.style.display !== 'none';
+        panel.style.display = isOpen ? 'none' : 'block';
+        infoBtn.setAttribute('aria-expanded', String(!isOpen));
+        if (!isOpen) panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      });
+    }
+    if (closeBtn && panel) {
+      closeBtn.addEventListener('click', () => {
+        panel.style.display = 'none';
+        infoBtn && infoBtn.setAttribute('aria-expanded', 'false');
+      });
+    }
+  });
+</script>
+</body>
+</html>
