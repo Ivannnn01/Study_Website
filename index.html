@@ -2,10 +2,153 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta http-equiv="refresh" content="0;url=home.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>StudySpace</title>
+  <meta name="description" content="Your personal study dashboard. Manage subjects, track practice papers, and access shortcuts." />
+  <link rel="stylesheet" href="css/global.css" />
+  <link rel="stylesheet" href="css/home.css" />
 </head>
 <body>
-  <p>Redirecting… <a href="home.html">Click here if not redirected.</a></p>
+<div class="page-wrapper">
+
+  <nav class="topnav" role="navigation" aria-label="Main navigation">
+    <div class="topnav-inner">
+      <a href="index.html" class="nav-brand" style="text-decoration:none">
+        <div class="nav-logo" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+          </svg>
+        </div>
+        <span class="nav-brand-name">StudySpace</span>
+      </a>
+      <div class="nav-links">
+        <a href="index.html" class="nav-link active" aria-current="page">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          Home
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="home-main" id="main-content">
+
+    <div class="welcome-banner animate-fadeInUp">
+      <div class="welcome-text">
+        <h1 style="font-size:1.6rem;margin-bottom:6px;">StudySpace 📚</h1>
+        <p>Track your progress, review weak spots, and ace your A-levels.</p>
+      </div>
+    </div>
+
+    <section class="subjects-section" aria-labelledby="subjects-heading">
+      <div class="section-header">
+        <div class="section-title">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary-light)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          <h2 id="subjects-heading">Subjects</h2>
+          <span class="section-badge" id="subject-count">0</span>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="openModal('modal-add-subject')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Subject
+        </button>
+      </div>
+      <div class="subjects-grid" id="subjects-grid"></div>
+    </section>
+
+    <section class="shortcuts-section" aria-labelledby="shortcuts-heading">
+      <div class="section-header">
+        <div class="section-title">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          <h2 id="shortcuts-heading">Shortcuts</h2>
+          <span class="section-badge" id="shortcut-count">0</span>
+        </div>
+        <button class="btn btn-secondary btn-sm" onclick="openModal('modal-add-shortcut')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Shortcut
+        </button>
+      </div>
+      <div class="shortcuts-grid" id="shortcuts-grid"></div>
+    </section>
+
+  </main>
+
+  <div class="modal-overlay" id="modal-add-subject" role="dialog" aria-modal="true" aria-labelledby="add-subject-title">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="add-subject-title">Add Subject</h3>
+        <button class="modal-close" onclick="closeModal('modal-add-subject')" aria-label="Close">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="input-subject-name">Subject Name</label>
+          <input type="text" id="input-subject-name" placeholder="e.g. H2 Chemistry" maxlength="60" />
+        </div>
+        <div class="form-group">
+          <label for="input-subject-icon">Icon</label>
+          <select id="input-subject-icon">
+            <option value="📚">📚 General</option>
+            <option value="📐">📐 Mathematics</option>
+            <option value="⚗️">⚗️ Chemistry</option>
+            <option value="⚡">⚡ Physics</option>
+            <option value="📊">📊 Economics</option>
+            <option value="📝">📝 General Paper</option>
+            <option value="🧬">🧬 Biology</option>
+            <option value="🌍">🌍 Geography</option>
+            <option value="🏛️">🏛️ History</option>
+            <option value="💻">💻 Computing</option>
+            <option value="🎨">🎨 Art</option>
+            <option value="🗣️">🗣️ Literature</option>
+            <option value="🔭">🔭 Science</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="btn-cancel-add-subject" type="button">Cancel</button>
+        <button class="btn btn-primary" id="btn-save-subject" type="button">Add Subject</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal-add-shortcut" role="dialog" aria-modal="true" aria-labelledby="add-shortcut-title">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="add-shortcut-title">Add Shortcut</h3>
+        <button class="modal-close" onclick="closeModal('modal-add-shortcut')" aria-label="Close">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="input-sc-name">Name</label>
+          <input type="text" id="input-sc-name" placeholder="e.g. Spotify" maxlength="40" />
+        </div>
+        <div class="form-group">
+          <label for="input-sc-url">URL</label>
+          <input type="url" id="input-sc-url" placeholder="e.g. spotify.com" />
+        </div>
+        <p style="font-size:0.8rem;color:var(--text-muted)">💡 The icon will be fetched automatically from the website.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="btn-cancel-add-shortcut" type="button">Cancel</button>
+        <button class="btn btn-primary" id="btn-save-shortcut" type="button">Add Shortcut</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal-confirm-delete-subject" role="dialog" aria-modal="true" aria-labelledby="confirm-delete-title">
+    <div class="modal confirm-dialog">
+      <div class="confirm-icon" aria-hidden="true">🗑️</div>
+      <h3 id="confirm-delete-title">Remove Subject?</h3>
+      <p>Are you sure you want to remove <strong id="confirm-delete-subject-name"></strong>? All chapters and practice papers will be deleted. This cannot be undone.</p>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="btn-cancel-delete-subject" type="button">Cancel</button>
+        <button class="btn btn-danger" id="btn-confirm-delete-subject" type="button">Yes, Remove</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" aria-live="polite" aria-label="Notifications"></div>
+
+</div>
+<script src="js/data.js"></script>
+<script src="js/home.js"></script>
 </body>
 </html>

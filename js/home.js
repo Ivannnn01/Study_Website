@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
           ${avgPct !== null ? `
           <div class="subject-stat">
             <span class="subject-stat-value" style="color:${getGradeColor(calculateGrade(avgPct))}">${avgPct}%</span>
-            <span class="subject-stat-label">Avg Score</span>
+            <span class="subject-stat-label">Avg</span>
           </div>` : ''}
         </div>
       `;
@@ -69,18 +69,18 @@ document.addEventListener('DOMContentLoaded', () => {
       subjectsGrid.appendChild(card);
     });
 
-    const addCard = document.createElement('button');
-    addCard.className = 'add-subject-card';
-    addCard.id = 'btn-add-subject';
-    addCard.innerHTML = `
-      <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      <span>Add Subject</span>
-    `;
-    addCard.addEventListener('click', () => openModal('modal-add-subject'));
-    subjectsGrid.appendChild(addCard);
+    if (subjects.length === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'empty-state';
+      empty.style.gridColumn = '1 / -1';
+      empty.innerHTML = `
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        <p>No subjects yet. Click <strong>Add Subject</strong> to get started.</p>
+      `;
+      subjectsGrid.appendChild(empty);
+    }
 
     subjectCount.textContent = subjects.length;
-    renderWelcomeStats();
   }
 
   let pendingDeleteSubjectId = null;
@@ -97,6 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
     pendingDeleteSubjectId = null;
     closeModal('modal-confirm-delete-subject');
     renderSubjects();
+    renderShortcuts();
     showToast('Subject removed.', 'success');
   });
 
@@ -120,9 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
     showToast(`"${name}" added!`, 'success');
   });
 
-  document.getElementById('btn-cancel-add-subject').addEventListener('click', () => {
-    closeModal('modal-add-subject');
-  });
+  document.getElementById('btn-cancel-add-subject').addEventListener('click', () => closeModal('modal-add-subject'));
 
   subjectNameInput.addEventListener('keydown', e => {
     if (e.key === 'Enter') document.getElementById('btn-save-subject').click();
@@ -138,7 +137,7 @@ document.addEventListener('DOMContentLoaded', () => {
     shortcuts.forEach((sc, idx) => {
       const faviconUrl = getFaviconUrl(sc.url);
       const iconHtml   = faviconUrl
-        ? `<img src="${faviconUrl}" alt="${escapeHtml(sc.name)}" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">`
+        ? `<img src="${faviconUrl}" alt="${escapeHtml(sc.name)}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
         : '';
       const fallback = `<span class="shortcut-fallback" ${faviconUrl ? 'style="display:none"' : ''}>${escapeHtml(sc.name.slice(0,2).toUpperCase())}</span>`;
 
@@ -166,14 +165,13 @@ document.addEventListener('DOMContentLoaded', () => {
       shortcutsGrid.appendChild(card);
     });
 
-    const addBtn = document.createElement('button');
-    addBtn.className = 'add-shortcut-card';
-    addBtn.innerHTML = `
-      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      <span>Add</span>
-    `;
-    addBtn.addEventListener('click', () => openModal('modal-add-shortcut'));
-    shortcutsGrid.appendChild(addBtn);
+    if (shortcuts.length === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'empty-state';
+      empty.style.gridColumn = '1 / -1';
+      empty.innerHTML = `<p>No shortcuts yet. Click <strong>Add Shortcut</strong> to add quick links.</p>`;
+      shortcutsGrid.appendChild(empty);
+    }
 
     shortcutCount.textContent = shortcuts.length;
   }
@@ -194,24 +192,11 @@ document.addEventListener('DOMContentLoaded', () => {
     showToast(`Shortcut "${name}" added!`, 'success');
   });
 
-  document.getElementById('btn-cancel-add-shortcut').addEventListener('click', () => {
-    closeModal('modal-add-shortcut');
-  });
+  document.getElementById('btn-cancel-add-shortcut').addEventListener('click', () => closeModal('modal-add-shortcut'));
 
   scUrlInput.addEventListener('keydown', e => {
     if (e.key === 'Enter') document.getElementById('btn-save-shortcut').click();
   });
-
-  function renderWelcomeStats() {
-    const subjects  = getSubjects();
-    const allPapers = subjects.flatMap(s => s.papers || []);
-    document.getElementById('stat-subjects').textContent = subjects.length;
-    document.getElementById('stat-papers').textContent   = allPapers.length;
-    const avgPct = allPapers.length
-      ? Math.round(allPapers.reduce((sum, p) => sum + p.percentage, 0) / allPapers.length)
-      : 0;
-    document.getElementById('stat-avg').textContent = allPapers.length ? avgPct + '%' : '—';
-  }
 
   renderSubjects();
   renderShortcuts();
