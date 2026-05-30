@@ -1,105 +1,31 @@
-﻿const DB_KEY_ACCOUNTS  = 'studyapp_accounts';
-const DB_KEY_SESSION   = 'studyapp_session';
+const DB_KEY = 'studyapp_data';
 
-function getAllAccounts() {
-  return JSON.parse(localStorage.getItem(DB_KEY_ACCOUNTS) || '{}');
-}
-
-function saveAllAccounts(accounts) {
-  localStorage.setItem(DB_KEY_ACCOUNTS, JSON.stringify(accounts));
-}
-
-function accountExists(username) {
-  return !!getAllAccounts()[username.toLowerCase()];
-}
-
-function createAccount(username, password) {
-  const accounts = getAllAccounts();
-  const key = username.toLowerCase();
-  if (accounts[key]) return false;
-  accounts[key] = {
-    username: username,
-    password: simpleHash(password),
-    created: Date.now(),
-    data: getEmptyUserData()
-  };
-  saveAllAccounts(accounts);
-  return true;
-}
-
-function verifyLogin(username, password) {
-  const accounts = getAllAccounts();
-  const key = username.toLowerCase();
-  if (!accounts[key]) return false;
-  return accounts[key].password === simpleHash(password);
-}
-
-function getEmptyUserData() {
-  return {
-    subjects: [],
-    shortcuts: []
-  };
-}
-
-function setSession(username) {
-  sessionStorage.setItem(DB_KEY_SESSION, username.toLowerCase());
-}
-
-function getSession() {
-  return sessionStorage.getItem(DB_KEY_SESSION) || null;
-}
-
-function clearSession() {
-  sessionStorage.removeItem(DB_KEY_SESSION);
-}
-
-function requireSession() {
-  const user = getSession();
-  if (!user) {
-    window.location.href = 'index.html';
-    return null;
+function getData() {
+  try {
+    return JSON.parse(localStorage.getItem(DB_KEY) || '{"subjects":[],"shortcuts":[]}');
+  } catch(e) {
+    return { subjects: [], shortcuts: [] };
   }
-  return user;
 }
 
-function getUserData(username) {
-  const accounts = getAllAccounts();
-  const key = username.toLowerCase();
-  if (!accounts[key]) return null;
-  return accounts[key].data || getEmptyUserData();
+function saveData(data) {
+  localStorage.setItem(DB_KEY, JSON.stringify(data));
 }
 
-function saveUserData(username, data) {
-  const accounts = getAllAccounts();
-  const key = username.toLowerCase();
-  if (!accounts[key]) return;
-  accounts[key].data = data;
-  saveAllAccounts(accounts);
+function getSubjects() {
+  return getData().subjects || [];
 }
 
-function getUserDisplayName(username) {
-  const accounts = getAllAccounts();
-  const key = username.toLowerCase();
-  if (!accounts[key]) return username;
-  return accounts[key].username;
-}
-
-function getSubjects(username) {
-  const data = getUserData(username);
-  return data ? (data.subjects || []) : [];
-}
-
-function saveSubjects(username, subjects) {
-  const data = getUserData(username) || getEmptyUserData();
+function saveSubjects(subjects) {
+  const data = getData();
   data.subjects = subjects;
-  saveUserData(username, data);
+  saveData(data);
 }
 
-function addSubject(username, name, icon) {
-  const subjects = getSubjects(username);
-  const id = 'subj_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
+function addSubject(name, icon) {
+  const subjects = getSubjects();
   const subject = {
-    id,
+    id: 'subj_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
     name,
     icon: icon || '📚',
     chapters: [],
@@ -107,31 +33,28 @@ function addSubject(username, name, icon) {
     created: Date.now()
   };
   subjects.push(subject);
-  saveSubjects(username, subjects);
+  saveSubjects(subjects);
   return subject;
 }
 
-function removeSubject(username, subjectId) {
-  let subjects = getSubjects(username);
-  subjects = subjects.filter(s => s.id !== subjectId);
-  saveSubjects(username, subjects);
+function removeSubject(subjectId) {
+  saveSubjects(getSubjects().filter(s => s.id !== subjectId));
 }
 
-function getSubject(username, subjectId) {
-  const subjects = getSubjects(username);
-  return subjects.find(s => s.id === subjectId) || null;
+function getSubject(subjectId) {
+  return getSubjects().find(s => s.id === subjectId) || null;
 }
 
-function updateSubject(username, subjectId, updates) {
-  const subjects = getSubjects(username);
+function updateSubject(subjectId, updates) {
+  const subjects = getSubjects();
   const idx = subjects.findIndex(s => s.id === subjectId);
   if (idx === -1) return;
   subjects[idx] = { ...subjects[idx], ...updates };
-  saveSubjects(username, subjects);
+  saveSubjects(subjects);
 }
 
-function addChapter(username, subjectId, number, name) {
-  const subjects = getSubjects(username);
+function addChapter(subjectId, number, name) {
+  const subjects = getSubjects();
   const idx = subjects.findIndex(s => s.id === subjectId);
   if (idx === -1) return null;
   const chapter = {
@@ -142,12 +65,12 @@ function addChapter(username, subjectId, number, name) {
   subjects[idx].chapters = subjects[idx].chapters || [];
   subjects[idx].chapters.push(chapter);
   subjects[idx].chapters.sort((a, b) => a.number - b.number);
-  saveSubjects(username, subjects);
+  saveSubjects(subjects);
   return chapter;
 }
 
-function removeChapter(username, subjectId, chapterId) {
-  const subjects = getSubjects(username);
+function removeChapter(subjectId, chapterId) {
+  const subjects = getSubjects();
   const idx = subjects.findIndex(s => s.id === subjectId);
   if (idx === -1) return;
   subjects[idx].chapters = (subjects[idx].chapters || []).filter(c => c.id !== chapterId);
@@ -155,21 +78,22 @@ function removeChapter(username, subjectId, chapterId) {
     ...p,
     difficultChapters: (p.difficultChapters || []).filter(dc => dc !== chapterId)
   }));
-  saveSubjects(username, subjects);
+  saveSubjects(subjects);
 }
 
-function updateChapter(username, subjectId, chapterId, updates) {
-  const subjects = getSubjects(username);
+function updateChapter(subjectId, chapterId, updates) {
+  const subjects = getSubjects();
   const idx = subjects.findIndex(s => s.id === subjectId);
   if (idx === -1) return;
   const cidx = subjects[idx].chapters.findIndex(c => c.id === chapterId);
   if (cidx === -1) return;
   subjects[idx].chapters[cidx] = { ...subjects[idx].chapters[cidx], ...updates };
   subjects[idx].chapters.sort((a, b) => a.number - b.number);
-  saveSubjects(username, subjects);
+  saveSubjects(subjects);
 }
-function addPaper(username, subjectId, name, score, total, difficultChapters, topics) {
-  const subjects = getSubjects(username);
+
+function addPaper(subjectId, name, score, total, difficultChapters, topics) {
+  const subjects = getSubjects();
   const idx = subjects.findIndex(s => s.id === subjectId);
   if (idx === -1) return null;
   const pct = total > 0 ? Math.round((score / total) * 100 * 10) / 10 : 0;
@@ -186,16 +110,16 @@ function addPaper(username, subjectId, name, score, total, difficultChapters, to
   };
   subjects[idx].papers = subjects[idx].papers || [];
   subjects[idx].papers.push(paper);
-  saveSubjects(username, subjects);
+  saveSubjects(subjects);
   return paper;
 }
 
-function removePaper(username, subjectId, paperId) {
-  const subjects = getSubjects(username);
+function removePaper(subjectId, paperId) {
+  const subjects = getSubjects();
   const idx = subjects.findIndex(s => s.id === subjectId);
   if (idx === -1) return;
   subjects[idx].papers = (subjects[idx].papers || []).filter(p => p.id !== paperId);
-  saveSubjects(username, subjects);
+  saveSubjects(subjects);
 }
 
 function calculateGrade(pct) {
@@ -207,11 +131,13 @@ function calculateGrade(pct) {
   if (pct >= 40) return 'S';
   return 'U';
 }
+
 function isGPSubject(subject) {
   return subject && subject.name.toLowerCase().includes('general paper');
 }
-function getGPTopics(username, subjectId) {
-  const subject = getSubject(username, subjectId);
+
+function getGPTopics(subjectId) {
+  const subject = getSubject(subjectId);
   if (!subject) return [];
   const countMap = {};
   (subject.papers || []).forEach(paper => {
@@ -226,13 +152,12 @@ function getGPTopics(username, subjectId) {
   return Object.values(countMap).sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
 }
 
-function getShortcuts(username) {
-  const data = getUserData(username);
-  return data ? (data.shortcuts || []) : [];
+function getShortcuts() {
+  return getData().shortcuts || [];
 }
 
-function addShortcut(username, name, url) {
-  const data = getUserData(username) || getEmptyUserData();
+function addShortcut(name, url) {
+  const data = getData();
   const shortcut = {
     id: 'sc_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
     name,
@@ -241,21 +166,21 @@ function addShortcut(username, name, url) {
   };
   data.shortcuts = data.shortcuts || [];
   data.shortcuts.push(shortcut);
-  saveUserData(username, data);
+  saveData(data);
   return shortcut;
 }
 
-function removeShortcut(username, shortcutId) {
-  const data = getUserData(username) || getEmptyUserData();
+function removeShortcut(shortcutId) {
+  const data = getData();
   data.shortcuts = (data.shortcuts || []).filter(s => s.id !== shortcutId);
-  saveUserData(username, data);
+  saveData(data);
 }
 
-function getChapterLeaderboard(username, subjectId) {
-  const subject = getSubject(username, subjectId);
+function getChapterLeaderboard(subjectId) {
+  const subject = getSubject(subjectId);
   if (!subject) return [];
   const chapters = subject.chapters || [];
-  const papers   = subject.papers || [];
+  const papers   = subject.papers   || [];
   const countMap = {};
   papers.forEach(paper => {
     (paper.difficultChapters || []).forEach(chId => {
@@ -266,15 +191,6 @@ function getChapterLeaderboard(username, subjectId) {
     .map(ch => ({ ...ch, count: countMap[ch.id] || 0 }))
     .filter(ch => ch.count > 0)
     .sort((a, b) => b.count - a.count || a.number - b.number);
-}
-
-function simpleHash(str) {
-  let hash = 5381;
-  for (let i = 0; i < str.length; i++) {
-    hash = ((hash << 5) + hash) ^ str.charCodeAt(i);
-    hash = hash >>> 0;
-  }
-  return 'h_' + hash.toString(16);
 }
 
 function normalizeUrl(url) {
@@ -293,9 +209,6 @@ function getFaviconUrl(url) {
   }
 }
 
-function getInitials(name) {
-  return (name || '?').split(' ').filter(w => w.length > 0).map(w => w[0]).join('').toUpperCase().slice(0, 2) || '?';
-}
 function showToast(message, type = 'info') {
   let container = document.querySelector('.toast-container');
   if (!container) {
@@ -313,6 +226,7 @@ function showToast(message, type = 'info') {
     toast.addEventListener('animationend', () => toast.remove());
   }, 3000);
 }
+
 function openModal(modalId) {
   const overlay = document.getElementById(modalId);
   if (overlay) overlay.classList.add('active');
@@ -326,9 +240,11 @@ function closeModal(modalId) {
 function closeAllModals() {
   document.querySelectorAll('.modal-overlay.active').forEach(m => m.classList.remove('active'));
 }
+
 document.addEventListener('click', e => {
   if (e.target.classList.contains('modal-overlay')) closeAllModals();
 });
+
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') closeAllModals();
 });
