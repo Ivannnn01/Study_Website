@@ -1,4 +1,43 @@
-﻿.subject-page-main {
+.grade-ref-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0;
+  margin-bottom: var(--space-lg);
+  padding: 10px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+}
+
+.grade-ref-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 14px;
+}
+
+.grade-ref-range {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.grade-ref-sep {
+  width: 1px;
+  height: 24px;
+  background: var(--border-subtle);
+  flex-shrink: 0;
+}
+
+@media (max-width: 700px) {
+  .grade-ref-bar { gap: 6px; padding: 10px 12px; }
+  .grade-ref-item { padding: 4px 8px; }
+  .grade-ref-sep { display: none; }
+}
+
+.subject-page-main {
   max-width: 1200px;
   margin: 0 auto;
   padding: var(--space-xl) var(--space-lg);
