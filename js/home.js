@@ -29,8 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
       card.className = 'subject-card';
       card.dataset.id = subj.id;
       card.style.setProperty('--card-accent', palette);
-      card.style.animation = `fadeInUp 0.4s ease ${idx * 0.06}s forwards`;
-      card.style.opacity = '0';
+      card.style.animation = `fadeInUp 0.4s ease ${idx * 0.06}s both`;
 
       card.innerHTML = `
         <div class="subject-card-header">
@@ -143,8 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const card = document.createElement('div');
       card.className = 'shortcut-card';
-      card.style.animation = `fadeInUp 0.4s ease ${idx * 0.05}s forwards`;
-      card.style.opacity = '0';
+      card.style.animation = `fadeInUp 0.4s ease ${idx * 0.05}s both`;
       card.innerHTML = `
         <button class="shortcut-delete" data-id="${sc.id}" aria-label="Remove shortcut" title="Remove">✕</button>
         <div class="shortcut-icon">${iconHtml}${fallback}</div>
