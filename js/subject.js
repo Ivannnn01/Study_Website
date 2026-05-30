@@ -200,7 +200,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     row.innerHTML = `
       <input type="number" id="add-ch-num" min="1" value="${nextNum}" style="width:70px;flex-shrink:0" placeholder="#">
-      <input type="text" id="add-ch-name" placeholder="Chapter name\u2026" style="flex:1">
+      <input type="text" id="add-ch-name" placeholder="Chapter Name" style="flex:1">
       <button class="btn btn-primary btn-sm" id="btn-add-chapter">
         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Add
