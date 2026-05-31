@@ -27,9 +27,10 @@ function addSubject(name, icon) {
   const subject = {
     id: 'subj_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
     name,
-    icon: icon || '📚',
+    icon: icon || '\uD83D\uDCDA',
     chapters: [],
     papers: [],
+    tasks: [],
     created: Date.now()
   };
   subjects.push(subject);
@@ -111,6 +112,7 @@ function addPaper(subjectId, name, score, total, difficultChapters, topics) {
   subjects[idx].papers = subjects[idx].papers || [];
   subjects[idx].papers.push(paper);
   saveSubjects(subjects);
+  recordActivity();
   return paper;
 }
 
@@ -209,6 +211,171 @@ function getFaviconUrl(url) {
   }
 }
 
+function getTheme() {
+  return getData().theme || 'dark';
+}
+
+function setTheme(theme) {
+  const data = getData();
+  data.theme = theme;
+  saveData(data);
+}
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+}
+
+function getExamConfig() {
+  return getData().examConfig || null;
+}
+
+function setExamConfig(name, dateStr) {
+  const data = getData();
+  data.examConfig = { name: name.trim(), dateStr };
+  saveData(data);
+}
+
+function clearExamConfig() {
+  const data = getData();
+  delete data.examConfig;
+  saveData(data);
+}
+
+function todayStr() {
+  const d = new Date();
+  return d.getFullYear() + '-' +
+    String(d.getMonth() + 1).padStart(2, '0') + '-' +
+    String(d.getDate()).padStart(2, '0');
+}
+
+function yesterdayStr() {
+  const d = new Date();
+  d.setDate(d.getDate() - 1);
+  return d.getFullYear() + '-' +
+    String(d.getMonth() + 1).padStart(2, '0') + '-' +
+    String(d.getDate()).padStart(2, '0');
+}
+
+function getStreak() {
+  const data = getData();
+  if (!data.streak) {
+    data.streak = { current: 0, longest: 0, lastActivity: null, activityDates: [] };
+    saveData(data);
+  }
+  return data.streak;
+}
+
+function recordActivity() {
+  const data = getData();
+  const streak = data.streak || { current: 0, longest: 0, lastActivity: null, activityDates: [] };
+  const today = todayStr();
+  const yesterday = yesterdayStr();
+
+  if (streak.lastActivity === today) {
+    return streak;
+  }
+
+  if (streak.lastActivity === yesterday) {
+    streak.current = (streak.current || 0) + 1;
+  } else {
+    streak.current = 1;
+  }
+
+  streak.longest = Math.max(streak.longest || 0, streak.current);
+  streak.lastActivity = today;
+
+  if (!streak.activityDates) streak.activityDates = [];
+  if (!streak.activityDates.includes(today)) {
+    streak.activityDates.push(today);
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - 90);
+    const cutoffStr = cutoff.getFullYear() + '-' +
+      String(cutoff.getMonth() + 1).padStart(2, '0') + '-' +
+      String(cutoff.getDate()).padStart(2, '0');
+    streak.activityDates = streak.activityDates.filter(d => d >= cutoffStr);
+  }
+
+  data.streak = streak;
+  saveData(data);
+  return streak;
+}
+
+function checkStreakValidity() {
+  const data = getData();
+  const streak = data.streak;
+  if (!streak || !streak.lastActivity) return;
+  const yesterday = yesterdayStr();
+  const today = todayStr();
+  if (streak.lastActivity !== today && streak.lastActivity !== yesterday) {
+    streak.current = 0;
+    data.streak = streak;
+    saveData(data);
+  }
+}
+
+function addTask(subjectId, title, dueDateStr) {
+  const subjects = getSubjects();
+  const idx = subjects.findIndex(s => s.id === subjectId);
+  if (idx === -1) return null;
+  subjects[idx].tasks = subjects[idx].tasks || [];
+  const task = {
+    id: 'task_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
+    title: title.trim(),
+    dueDate: dueDateStr || null,
+    completed: false,
+    created: Date.now()
+  };
+  subjects[idx].tasks.push(task);
+  saveSubjects(subjects);
+  return task;
+}
+
+function toggleTask(subjectId, taskId) {
+  const subjects = getSubjects();
+  const idx = subjects.findIndex(s => s.id === subjectId);
+  if (idx === -1) return;
+  subjects[idx].tasks = subjects[idx].tasks || [];
+  const tidx = subjects[idx].tasks.findIndex(t => t.id === taskId);
+  if (tidx === -1) return;
+  subjects[idx].tasks[tidx].completed = !subjects[idx].tasks[tidx].completed;
+  if (subjects[idx].tasks[tidx].completed) recordActivity();
+  saveSubjects(subjects);
+}
+
+function removeTask(subjectId, taskId) {
+  const subjects = getSubjects();
+  const idx = subjects.findIndex(s => s.id === subjectId);
+  if (idx === -1) return;
+  subjects[idx].tasks = (subjects[idx].tasks || []).filter(t => t.id !== taskId);
+  saveSubjects(subjects);
+}
+
+function getTasksForSubject(subjectId) {
+  const subject = getSubject(subjectId);
+  return subject ? (subject.tasks || []) : [];
+}
+
+function getAllUpcomingTasks() {
+  const subjects = getSubjects();
+  const result = [];
+  const nowMs = Date.now();
+  const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
+  subjects.forEach(subj => {
+    (subj.tasks || []).forEach(task => {
+      if (task.completed) return;
+      result.push({ ...task, subjectId: subj.id, subjectName: subj.name, subjectIcon: subj.icon });
+    });
+  });
+  result.sort((a, b) => {
+    const aHas = !!a.dueDate, bHas = !!b.dueDate;
+    if (aHas && !bHas) return -1;
+    if (!aHas && bHas) return 1;
+    if (aHas && bHas) return a.dueDate.localeCompare(b.dueDate);
+    return a.created - b.created;
+  });
+  return result;
+}
+
 function showToast(message, type = 'info') {
   let container = document.querySelector('.toast-container');
   if (!container) {
@@ -218,7 +385,7 @@ function showToast(message, type = 'info') {
   }
   const toast = document.createElement('div');
   toast.className = `toast toast-${type}`;
-  const icons = { success: '✓', error: '✕', info: 'ℹ' };
+  const icons = { success: '\u2713', error: '\u2715', info: 'i' };
   toast.innerHTML = `<span>${icons[type] || icons.info}</span><span>${message}</span>`;
   container.appendChild(toast);
   setTimeout(() => {
@@ -248,3 +415,11 @@ document.addEventListener('click', e => {
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') closeAllModals();
 });
+
+(function initTheme() {
+  const theme = getTheme();
+  applyTheme(theme);
+})();
+
+checkStreakValidity();
+recordActivity();

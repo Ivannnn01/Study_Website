@@ -23,7 +23,9 @@
         </div>
         <span class="nav-brand-name">StudySpace</span>
       </a>
-
+      <div class="nav-right">
+        <button class="theme-toggle" id="btn-theme-toggle" type="button" title="Toggle theme">&#x2600;&#xFE0F;</button>
+      </div>
     </div>
   </nav>
 
@@ -45,6 +47,10 @@
           <span class="meta-chip" id="chip-papers">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
             0 papers
+          </span>
+          <span class="meta-chip" id="chip-tasks">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            0 tasks
           </span>
         </div>
       </div>
@@ -90,6 +96,10 @@
       <button class="subject-tab-btn" data-tab="leaderboard" role="tab" aria-selected="false" aria-controls="tab-leaderboard" id="tabBtn-leaderboard">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
         Weak Chapters
+      </button>
+      <button class="subject-tab-btn" data-tab="tasks" role="tab" aria-selected="false" aria-controls="tab-tasks" id="tabBtn-tasks">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        Tasks
       </button>
     </div>
 
@@ -269,6 +279,13 @@
       </div>
     </div>
 
+    <div class="subject-tab-content" id="tab-tasks" role="tabpanel" aria-labelledby="tabBtn-tasks">
+      <div class="tasks-section-header">
+        <h2>Tasks</h2>
+      </div>
+      <div id="task-list-container"></div>
+    </div>
+
   </main>
 
   <div class="modal-overlay" id="modal-add-paper" role="dialog" aria-modal="true" aria-labelledby="add-paper-title">
@@ -377,8 +394,8 @@
 
 </div>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
-<script src="js/data.js?v=2"></script>
-<script src="js/subject.js?v=2"></script>
+<script src="js/data.js?v=3"></script>
+<script src="js/subject.js?v=3"></script>
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {

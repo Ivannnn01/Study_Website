@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
+  applyTheme(getTheme());
   const params    = new URLSearchParams(window.location.search);
   const subjectId = params.get('id');
   if (!subjectId) { window.location.href = 'index.html'; return; }
@@ -11,6 +12,21 @@ document.addEventListener('DOMContentLoaded', () => {
   document.title = `${subject.name} \u2014 StudySpace`;
   document.getElementById('subject-title').textContent     = subject.name;
   document.getElementById('subject-icon-display').textContent = subject.icon || '\uD83D\uDCDA';
+
+  const themeToggle = document.getElementById('btn-theme-toggle');
+  if (themeToggle) {
+    const updateToggle = () => {
+      const t = getTheme();
+      themeToggle.textContent = t === 'dark' ? '\u2600\uFE0F' : '\uD83C\uDF19';
+    };
+    updateToggle();
+    themeToggle.addEventListener('click', () => {
+      const next = getTheme() === 'dark' ? 'light' : 'dark';
+      setTheme(next);
+      applyTheme(next);
+      updateToggle();
+    });
+  }
 
   if (isGP) {
     document.getElementById('tabBtn-syllabus').innerHTML = `
@@ -27,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const lbTitle = document.getElementById('leaderboard-tab-title');
     const lbDesc  = document.getElementById('leaderboard-tab-desc');
     if (lbTitle) lbTitle.textContent = 'Topics Done';
-    if (lbDesc)  lbDesc.textContent  = 'Topics are ranked by how many practice papers covered them. Use this to track which areas you have practised the most. \uD83D\uDDC2\uFE0F';
+    if (lbDesc)  lbDesc.textContent  = 'Topics are ranked by how many practice papers covered them. Use this to track which areas you have practised the most.';
   }
 
   function refreshSubject() {
@@ -40,10 +56,17 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!subject) return;
     if (!isGP) document.getElementById('chip-chapters').textContent = `${(subject.chapters||[]).length} chapters`;
     document.getElementById('chip-papers').textContent = `${(subject.papers||[]).length} papers`;
+    const taskChip = document.getElementById('chip-tasks');
+    if (taskChip) {
+      const pending = (subject.tasks || []).filter(t => !t.completed).length;
+      taskChip.textContent = `${pending} task${pending !== 1 ? 's' : ''}`;
+    }
   }
 
   const tabBtns     = document.querySelectorAll('.subject-tab-btn');
   const tabContents = document.querySelectorAll('.subject-tab-content');
+
+  const initTabParam = new URLSearchParams(window.location.search).get('tab');
 
   function switchTab(tabId) {
     tabBtns.forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tabId));
@@ -51,6 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (tabId === 'syllabus')    isGP ? renderGPTopics()   : renderSyllabus();
     if (tabId === 'papers')      renderPapers();
     if (tabId === 'leaderboard') isGP ? renderTopicsDone() : renderLeaderboard();
+    if (tabId === 'tasks')       renderTasks();
   }
 
   tabBtns.forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.tab)));
@@ -94,7 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
     syllabusList.appendChild(header);
 
     const sorted = [...topics].sort((a, b) => a.name.localeCompare(b.name));
-    const grid   = document.createElement('div');
+    const grid = document.createElement('div');
     grid.className = 'gp-topics-grid';
     sorted.forEach((t, idx) => {
       const chip = document.createElement('div');
@@ -110,9 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
     refreshSubject();
     const chapters = subject ? (subject.chapters || []) : [];
     syllabusList.innerHTML = '';
-
     chapters.forEach(ch => syllabusList.appendChild(createChapterRow(ch)));
-
     const addRow = createAddChapterRow();
     if (chapters.length === 0) {
       const emptyMsg = document.createElement('div');
@@ -149,14 +171,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const nameDisplay = row.querySelector('.chapter-name-display');
     const actions     = row.querySelector('.chapter-actions');
 
-    const numInput  = document.createElement('input');
-    numInput.type   = 'number'; numInput.min = '1'; numInput.value = ch.number;
+    const numInput     = document.createElement('input');
+    numInput.type      = 'number'; numInput.min = '1'; numInput.value = ch.number;
     numInput.className = 'chapter-name-input';
     numInput.style.cssText = 'width:60px;margin-right:8px;';
 
-    const nameInput = document.createElement('input');
+    const nameInput     = document.createElement('input');
     nameInput.className = 'chapter-name-input';
-    nameInput.value = ch.name;
+    nameInput.value     = ch.name;
 
     numDisplay.replaceWith(numInput);
     nameDisplay.replaceWith(nameInput);
@@ -193,8 +215,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function createAddChapterRow() {
-    const row      = document.createElement('div');
-    row.className  = 'add-chapter-row';
+    const row = document.createElement('div');
+    row.className = 'add-chapter-row';
     const chapters = subject ? (subject.chapters || []) : [];
     const nextNum  = chapters.length > 0 ? Math.max(...chapters.map(c => c.number)) + 1 : 1;
 
@@ -233,7 +255,6 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!file) return;
       csvInput.value = '';
       const ext = file.name.split('.').pop().toLowerCase();
-
       if (ext === 'csv') {
         const reader = new FileReader();
         reader.onload = ev => bulkAddChapters(parseCSVText(ev.target.result));
@@ -259,8 +280,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function parseCSVText(text) {
     const lines = text.split(/\r?\n/).filter(l => l.trim());
     return parseRowsToChapters(lines.map(line => {
-      const parts = [];
-      let current = '', inQuote = false;
+      const parts = []; let current = '', inQuote = false;
       for (let i = 0; i < line.length; i++) {
         const ch = line[i];
         if (ch === '"') { inQuote = !inQuote; }
@@ -291,8 +311,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function renderPapers() {
     refreshSubject();
-    const papers   = subject ? (subject.papers || []) : [];
-    const tbody    = document.getElementById('papers-tbody');
+    const papers  = subject ? (subject.papers || []) : [];
+    const tbody   = document.getElementById('papers-tbody');
     const emptyRow = document.getElementById('papers-empty-row');
 
     tbody.querySelectorAll('tr:not(#papers-empty-row)').forEach(r => r.remove());
@@ -354,9 +374,9 @@ document.addEventListener('DOMContentLoaded', () => {
     renderStats();
   }
 
-  const paperNameInput  = document.getElementById('input-paper-name');
-  const paperScoreInput = document.getElementById('input-paper-score');
-  const paperTotalInput = document.getElementById('input-paper-total');
+  const paperNameInput    = document.getElementById('input-paper-name');
+  const paperScoreInput   = document.getElementById('input-paper-score');
+  const paperTotalInput   = document.getElementById('input-paper-total');
   const scorePreviewPct   = document.getElementById('score-preview-pct');
   const scorePreviewGrade = document.getElementById('score-preview-grade');
 
@@ -564,7 +584,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="lb-chapter-name">${escapeHtml(t.name)}</div>
           <div class="lb-chapter-num">${t.count} paper${t.count !== 1 ? 's' : ''} covered this topic</div>
         </div>
-        <div class="lb-bar-wrap"><div class="lb-bar-track"><div class="lb-bar-fill ${barClass}" style="width:0%;background:linear-gradient(90deg, var(--primary), var(--accent))" data-target="${barWidth}%"></div></div></div>
+        <div class="lb-bar-wrap"><div class="lb-bar-track"><div class="lb-bar-fill ${barClass}" style="width:0%;background:linear-gradient(90deg,var(--primary),var(--accent))" data-target="${barWidth}%"></div></div></div>
         <div class="lb-count"><span class="lb-count-num">${t.count}</span><span class="lb-count-label">${t.count === 1 ? 'paper' : 'papers'}</span></div>
       `;
       lbList.appendChild(row);
@@ -572,9 +592,120 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  function renderTasks() {
+    refreshSubject();
+    const tasks      = getTasksForSubject(subjectId);
+    const pending    = tasks.filter(t => !t.completed);
+    const completed  = tasks.filter(t => t.completed);
+    const container  = document.getElementById('task-list-container');
+    if (!container) return;
+    container.innerHTML = '';
+
+    const today   = todayStr();
+    const in3Days = (() => { const d = new Date(); d.setDate(d.getDate() + 3); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); })();
+
+    function getDueClass(dueDate) {
+      if (!dueDate) return 'due-later';
+      if (dueDate < today)        return 'due-overdue';
+      if (dueDate === today)      return 'due-today';
+      if (dueDate <= in3Days)     return 'due-soon';
+      return 'due-later';
+    }
+    function getDueLabel(dueDate) {
+      if (!dueDate)           return '';
+      if (dueDate < today)    return 'Overdue';
+      if (dueDate === today)  return 'Today';
+      if (dueDate <= in3Days) return 'Soon';
+      return dueDate;
+    }
+
+    function createTaskEl(task, idx) {
+      const item = document.createElement('div');
+      item.className = 'task-item' + (task.completed ? ' completed' : '');
+      item.style.animationDelay = `${idx * 0.04}s`;
+      const dueClass = getDueClass(task.dueDate);
+      const dueLabel = getDueLabel(task.dueDate);
+      item.innerHTML = `
+        <div class="task-checkbox" title="${task.completed ? 'Mark incomplete' : 'Mark complete'}">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="task-info">
+          <div class="task-title">${escapeHtml(task.title)}</div>
+        </div>
+        ${dueLabel ? `<span class="task-due ${dueClass}">${dueLabel}</span>` : ''}
+        <button class="task-delete-btn" title="Remove task">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+        </button>
+      `;
+      item.querySelector('.task-checkbox').addEventListener('click', () => {
+        toggleTask(subjectId, task.id);
+        renderTasks();
+        updateMetaChips();
+      });
+      item.querySelector('.task-delete-btn').addEventListener('click', () => {
+        removeTask(subjectId, task.id);
+        renderTasks();
+        updateMetaChips();
+        showToast('Task removed.', 'success');
+      });
+      return item;
+    }
+
+    if (tasks.length === 0) {
+      container.innerHTML = `<div class="empty-state"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><p>No tasks yet. Add your first task below.</p></div>`;
+    }
+
+    const pendingList = document.createElement('div');
+    pendingList.className = 'task-list';
+    pending.forEach((t, i) => pendingList.appendChild(createTaskEl(t, i)));
+    container.appendChild(pendingList);
+
+    if (completed.length > 0) {
+      const divider = document.createElement('div');
+      divider.className = 'tasks-completed-divider';
+      divider.textContent = `Completed (${completed.length})`;
+      container.appendChild(divider);
+
+      const completedList = document.createElement('div');
+      completedList.className = 'task-list';
+      completed.forEach((t, i) => completedList.appendChild(createTaskEl(t, i)));
+      container.appendChild(completedList);
+    }
+
+    const addRow = document.createElement('div');
+    addRow.className = 'add-task-row';
+    addRow.innerHTML = `
+      <input type="text" id="add-task-title" placeholder="New task\u2026" style="flex:1">
+      <input type="date" id="add-task-due" title="Due date (optional)">
+      <button class="btn btn-primary btn-sm" id="btn-add-task">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add
+      </button>
+    `;
+    container.appendChild(addRow);
+
+    const titleIn = addRow.querySelector('#add-task-title');
+    const dueIn   = addRow.querySelector('#add-task-due');
+    const addBtn  = addRow.querySelector('#btn-add-task');
+
+    const doAdd = () => {
+      const title = titleIn.value.trim();
+      if (!title) { showToast('Please enter a task title.', 'error'); titleIn.focus(); return; }
+      addTask(subjectId, title, dueIn.value || null);
+      renderTasks();
+      updateMetaChips();
+      showToast('Task added!', 'success');
+    };
+
+    addBtn.addEventListener('click', doAdd);
+    titleIn.addEventListener('keydown', e => { if (e.key === 'Enter') doAdd(); });
+  }
+
   refreshSubject();
   renderStats();
-  switchTab('syllabus');
+
+  const startTab = initTabParam || 'syllabus';
+  switchTab(startTab);
 });
 
 function escapeHtml(str) {
