@@ -48,7 +48,7 @@ function initStreak() {
 
 function initExamSystem() {
   renderExamCountdowns();
-  setInterval(updateExamTimers, 1000);
+  setInterval(updateExamTimers, 60000);
 
   document.getElementById('btn-add-exam').addEventListener('click', () => {
     document.getElementById('input-exam-name').value = '';
@@ -58,11 +58,12 @@ function initExamSystem() {
   });
 
   document.getElementById('btn-save-exam').addEventListener('click', () => {
-    const name    = document.getElementById('input-exam-name').value.trim();
-    const dateStr = document.getElementById('input-exam-date').value;
+    const name     = document.getElementById('input-exam-name').value.trim();
+    const dateStr  = document.getElementById('input-exam-date').value;
+    const category = document.getElementById('input-exam-cat').value.trim();
     if (!name)    { showToast('Please enter an exam name.', 'error');  return; }
     if (!dateStr) { showToast('Please select a date.', 'error');       return; }
-    addExamDate(name, dateStr);
+    addExamDate(name, dateStr, category);
     closeModal('modal-exam');
     renderExamCountdowns();
     showToast('\uD83D\uDCC5 Exam added!', 'success');
@@ -74,9 +75,22 @@ function initExamSystem() {
   document.getElementById('btn-import-exam-csv').addEventListener('click', () => csvInput.click());
   csvInput.addEventListener('change', handleExamCSVImport);
 
+  const infoBtn   = document.getElementById('btn-exam-csv-info');
+  const infoPanel = document.getElementById('exam-csv-format-panel');
+  const closeInfo = document.getElementById('btn-close-exam-csv-info');
+  function toggleExamFormatPanel(open) {
+    const show = open !== undefined ? open : infoPanel.style.display === 'none';
+    infoPanel.style.display = show ? '' : 'none';
+    infoBtn.setAttribute('aria-expanded', show ? 'true' : 'false');
+  }
+  if (infoBtn)   infoBtn.addEventListener('click', () => toggleExamFormatPanel());
+  if (closeInfo) closeInfo.addEventListener('click', () => toggleExamFormatPanel(false));
+
   const nameIn = document.getElementById('input-exam-name');
+  const catIn  = document.getElementById('input-exam-cat');
   const dateIn = document.getElementById('input-exam-date');
-  if (nameIn) nameIn.addEventListener('keydown', e => { if (e.key === 'Enter') dateIn.focus(); });
+  if (nameIn) nameIn.addEventListener('keydown', e => { if (e.key === 'Enter') catIn.focus(); });
+  if (catIn)  catIn.addEventListener('keydown',  e => { if (e.key === 'Enter') dateIn.focus(); });
   if (dateIn) dateIn.addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('btn-save-exam').click(); });
 }
 
@@ -135,8 +149,9 @@ function handleExamCSVImport(e) {
     lines.forEach((line, idx) => {
       const cols = parseCSVLine(line);
       if (cols.length < 2) return;
-      const name    = cols[0].replace(/^"|"$/g, '').trim();
-      const rawDate = cols[1].replace(/^"|"$/g, '').trim();
+      const name     = cols[0].replace(/^"|"$/g, '').trim();
+      const rawDate  = cols[1].replace(/^"|"$/g, '').trim();
+      const category = cols[2] ? cols[2].replace(/^"|"$/g, '').trim() : '';
       if (idx === 0) {
         const nl = name.toLowerCase(), dl = rawDate.toLowerCase();
         if (nl === 'name' || nl === 'exam name' || nl === 'exam' || dl === 'date' || dl === 'exam date') return;
@@ -144,7 +159,7 @@ function handleExamCSVImport(e) {
       if (!name) return;
       const dateStr = parseExamDate(rawDate);
       if (!dateStr) { skipped++; return; }
-      addExamDate(name, dateStr);
+      addExamDate(name, dateStr, category);
       imported++;
     });
     e.target.value = '';
@@ -181,8 +196,6 @@ function renderExamCountdowns() {
   exams.forEach((exam, idx) => {
     const diffMs = Math.max(0, new Date(exam.dateStr + 'T00:00:00') - now);
     const days   = Math.floor(diffMs / 86400000);
-    const hours  = Math.floor((diffMs % 86400000) / 3600000);
-    const mins   = Math.floor((diffMs % 3600000) / 60000);
     const color  = urgencyColor(days);
 
     const card = document.createElement('div');
@@ -194,7 +207,7 @@ function renderExamCountdowns() {
       <div class="exam-card-name">${escapeHtml(exam.name)}</div>
       <div class="exam-card-days" id="exam-days-${exam.id}">${days}</div>
       <div class="exam-card-days-lbl">days</div>
-      <div class="exam-card-hm" id="exam-hm-${exam.id}">${String(hours).padStart(2,'0')}:${String(mins).padStart(2,'0')}</div>
+      ${exam.category ? `<div class="exam-card-cat">${escapeHtml(exam.category)}</div>` : '<div class="exam-card-cat-empty"></div>'}
     `;
     card.querySelector('.exam-delete-btn').addEventListener('click', e => {
       e.stopPropagation();
@@ -210,14 +223,10 @@ function updateExamTimers() {
   const exams = getUpcomingExamDates();
   const now   = new Date();
   exams.forEach(exam => {
-    const diffMs = Math.max(0, new Date(exam.dateStr + 'T00:00:00') - now);
-    const days   = Math.floor(diffMs / 86400000);
-    const hours  = Math.floor((diffMs % 86400000) / 3600000);
-    const mins   = Math.floor((diffMs % 3600000) / 60000);
     const dEl = document.getElementById(`exam-days-${exam.id}`);
-    const hEl = document.getElementById(`exam-hm-${exam.id}`);
-    if (dEl) dEl.textContent = days;
-    if (hEl) hEl.textContent = String(hours).padStart(2,'0') + ':' + String(mins).padStart(2,'0');
+    if (!dEl) return;
+    const diffMs = Math.max(0, new Date(exam.dateStr + 'T00:00:00') - now);
+    dEl.textContent = Math.floor(diffMs / 86400000);
   });
 }
 

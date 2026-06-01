@@ -56,9 +56,69 @@
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             Add Exam
           </button>
+          <button class="btn-icon csv-format-info-btn" type="button" id="btn-exam-csv-info" title="View CSV format guide" aria-label="View exam CSV format guide" aria-expanded="false" aria-controls="exam-csv-format-panel">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </button>
         </div>
       </div>
-      <div class="exam-grid" id="exam-grid"></div>
+      <div class="csv-format-panel" id="exam-csv-format-panel" style="display:none" aria-live="polite">
+        <div class="csv-format-inner">
+          <div class="csv-format-header">
+            <span>&#x1F4CB; Exam CSV Format Guide</span>
+            <button type="button" class="csv-format-close" id="btn-close-exam-csv-info" aria-label="Close format guide">&#x2715;</button>
+          </div>
+          <div class="csv-format-body">
+            <div class="csv-format-columns">
+              <div class="csv-col-card">
+                <div class="csv-col-label">Column A</div>
+                <div class="csv-col-name">Exam Name</div>
+                <div class="csv-col-desc">Any text, e.g. <code>H2 Chemistry Paper 1</code></div>
+              </div>
+              <div class="csv-col-arrow">&#x2192;</div>
+              <div class="csv-col-card">
+                <div class="csv-col-label">Column B</div>
+                <div class="csv-col-name">Exam Date</div>
+                <div class="csv-col-desc"><code>18/06/2026</code> &nbsp; <code>2026-06-18</code> &nbsp; <code>18 June 2026</code></div>
+              </div>
+              <div class="csv-col-arrow">&#x2192;</div>
+              <div class="csv-col-card">
+                <div class="csv-col-label">Column C &mdash; optional</div>
+                <div class="csv-col-name">Exam Type</div>
+                <div class="csv-col-desc">e.g. <code>A-Levels</code>, <code>Prelims</code>, <code>Mid-Year</code></div>
+              </div>
+            </div>
+            <div class="csv-format-rules">
+              <div class="csv-rule csv-rule-ok">
+                <span class="csv-rule-icon">&#x2713;</span>
+                <span><strong>Header row is optional</strong> &mdash; if Column A is &ldquo;name&rdquo; / &ldquo;exam&rdquo; and Column B is &ldquo;date&rdquo;, that row is auto-skipped.</span>
+              </div>
+              <div class="csv-rule csv-rule-ok">
+                <span class="csv-rule-icon">&#x2713;</span>
+                <span>Date formats accepted: <strong>DD/MM/YYYY</strong>, <strong>YYYY-MM-DD</strong>, <strong>18 June 2026</strong>, <strong>June 18 2026</strong> and more.</span>
+              </div>
+              <div class="csv-rule csv-rule-ok">
+                <span class="csv-rule-icon">&#x2713;</span>
+                <span>Column C (Exam Type) is <strong>completely optional</strong> &mdash; rows with only 2 columns import fine.</span>
+              </div>
+              <div class="csv-rule csv-rule-warn">
+                <span class="csv-rule-icon">!</span>
+                <span>Rows with <strong>unreadable dates</strong> are skipped and reported in a toast notification.</span>
+              </div>
+            </div>
+            <div class="csv-format-example">
+              <div class="csv-example-title">Example (with header + exam type):</div>
+              <pre class="csv-example-pre">Exam Name,Exam Date,Exam Type
+H2 Chemistry P1,18/06/2026,Prelims
+H2 Econs P2,19/06/2026,Prelims
+H2 Math P1,2026-11-03,A-Levels</pre>
+              <div class="csv-example-title" style="margin-top:var(--space-sm)">Example (minimal, no header):</div>
+              <pre class="csv-example-pre">H2 Chemistry P1,18/06/2026
+H2 Econs P2,19 June 2026</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="exam-scroll-wrap"><div class="exam-grid" id="exam-grid"></div></div>
     </section>
 
     <section class="subjects-section" aria-labelledby="subjects-heading">
@@ -187,6 +247,10 @@
         <div class="form-group">
           <label for="input-exam-name">Exam Name</label>
           <input type="text" id="input-exam-name" placeholder="e.g. H2 Chemistry Paper 1" maxlength="60" />
+        </div>
+        <div class="form-group">
+          <label for="input-exam-cat">Exam Type <span style="color:var(--text-muted);font-weight:400">(optional)</span></label>
+          <input type="text" id="input-exam-cat" placeholder="e.g. A-Levels, Prelims, Mid-Year" maxlength="30" />
         </div>
         <div class="form-group">
           <label for="input-exam-date">Exam Date</label>

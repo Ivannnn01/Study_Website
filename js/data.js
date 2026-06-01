@@ -236,10 +236,15 @@ function getExamDates() {
   return data.examDates || [];
 }
 
-function addExamDate(name, dateStr) {
+function addExamDate(name, dateStr, category) {
   const data = getData();
   data.examDates = data.examDates || [];
-  data.examDates.push({ id: 'exam_' + Date.now() + '_' + Math.random().toString(36).slice(2,5), name: name.trim(), dateStr });
+  data.examDates.push({
+    id: 'exam_' + Date.now() + '_' + Math.random().toString(36).slice(2,5),
+    name: name.trim(),
+    dateStr,
+    category: category ? category.trim() : ''
+  });
   data.examDates.sort((a, b) => a.dateStr.localeCompare(b.dateStr));
   saveData(data);
 }
@@ -252,7 +257,7 @@ function removeExamDate(id) {
 
 function getUpcomingExamDates() {
   const today = todayStr();
-  return getExamDates().filter(e => e.dateStr >= today).sort((a, b) => a.dateStr.localeCompare(b.dateStr)).slice(0, 6);
+  return getExamDates().filter(e => e.dateStr >= today).sort((a, b) => a.dateStr.localeCompare(b.dateStr));
 }
 
 function todayStr() {
