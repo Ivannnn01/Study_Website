@@ -47,8 +47,8 @@ function initStreak() {
 }
 
 function initExamSystem() {
-  renderExamList();
-  setInterval(updateExamTimers, 60000);
+  renderExamCountdowns();
+  setInterval(updateExamTimers, 1000);
 
   document.getElementById('btn-add-exam').addEventListener('click', () => {
     document.getElementById('input-exam-name').value = '';
@@ -64,7 +64,7 @@ function initExamSystem() {
     if (!dateStr) { showToast('Please select a date.', 'error');       return; }
     addExamDate(name, dateStr);
     closeModal('modal-exam');
-    renderExamList();
+    renderExamCountdowns();
     showToast('\uD83D\uDCC5 Exam added!', 'success');
   });
 
@@ -80,84 +80,64 @@ function urgencyColor(daysLeft) {
   if (daysLeft < 7)  return '#EF4444';
   if (daysLeft < 15) return '#F97316';
   if (daysLeft < 30) return 'var(--accent)';
-  return 'var(--primary-light)';
+  return 'var(--primary)';
 }
 
-function renderExamList() {
-  const list    = document.getElementById('exam-list');
-  const wrap    = document.getElementById('exam-list-wrap');
+function renderExamCountdowns() {
+  const grid    = document.getElementById('exam-grid');
   const countEl = document.getElementById('exam-count');
-  if (!list) return;
-  list.innerHTML = '';
+  if (!grid) return;
+  grid.innerHTML = '';
 
-  const allExams = getExamDates().sort((a, b) => a.dateStr.localeCompare(b.dateStr));
-  if (countEl) countEl.textContent = allExams.length;
+  const exams = getUpcomingExamDates();
+  if (countEl) countEl.textContent = exams.length;
 
-  if (allExams.length === 0) {
-    list.innerHTML = '<div class="exam-empty-msg">No exams yet \u2014 click <strong>+ Add Exam</strong> to start tracking.</div>';
+  if (exams.length === 0) {
+    grid.innerHTML = '<div class="exam-empty-state"><p>No upcoming exams. Click <strong>+ Add Exam</strong> to start tracking.</p></div>';
     return;
   }
 
-  const today = todayStr();
-  const now   = new Date();
+  const now = new Date();
+  exams.forEach((exam, idx) => {
+    const diffMs = Math.max(0, new Date(exam.dateStr + 'T00:00:00') - now);
+    const days   = Math.floor(diffMs / 86400000);
+    const hours  = Math.floor((diffMs % 86400000) / 3600000);
+    const mins   = Math.floor((diffMs % 3600000) / 60000);
+    const color  = urgencyColor(days);
 
-  allExams.forEach(exam => {
-    const isPast  = exam.dateStr < today;
-    const isToday = exam.dateStr === today;
-    const target  = new Date(exam.dateStr + 'T00:00:00');
-    const diffMs  = target - now;
-    const absDays = Math.abs(Math.floor(diffMs / 86400000));
-    const color   = isPast ? 'var(--text-muted)' : urgencyColor(Math.floor(diffMs / 86400000));
-
-    const dateDisplay = target.toLocaleDateString('en-GB', { day: 'numeric', month: 'long' });
-
-    let daysLabel;
-    if (isToday)     daysLabel = 'Today!';
-    else if (isPast) daysLabel = absDays + (absDays === 1 ? ' day ago' : ' days ago');
-    else             daysLabel = absDays + (absDays === 1 ? ' day' : ' days');
-
-    const row = document.createElement('div');
-    row.className = 'exam-row' + (isPast ? ' er-past' : '') + (isToday ? ' er-today' : '');
-    row.id = `exam-row-${exam.id}`;
-    row.style.setProperty('--exam-accent', color);
-
-    row.innerHTML = `
-      <div class="er-name">${escapeHtml(exam.name)}</div>
-      <div class="er-dash">\u2014</div>
-      <div class="er-date">${dateDisplay}</div>
-      <div class="er-days" id="exam-days-${exam.id}">(${daysLabel})</div>
-      <button class="er-delete" title="Remove exam">\u2715</button>
+    const card = document.createElement('div');
+    card.className = 'exam-card';
+    card.id = `exam-card-${exam.id}`;
+    card.style.cssText = `animation: fadeInUp 0.3s ease ${idx * 0.07}s both; --exam-accent: ${color};`;
+    card.innerHTML = `
+      <button class="exam-delete-btn" data-id="${exam.id}" title="Remove">\u2715</button>
+      <div class="exam-card-name">${escapeHtml(exam.name)}</div>
+      <div class="exam-card-days" id="exam-days-${exam.id}">${days}</div>
+      <div class="exam-card-days-lbl">days</div>
+      <div class="exam-card-hm" id="exam-hm-${exam.id}">${String(hours).padStart(2,'0')}:${String(mins).padStart(2,'0')}</div>
     `;
-
-    row.querySelector('.er-delete').addEventListener('click', e => {
+    card.querySelector('.exam-delete-btn').addEventListener('click', e => {
       e.stopPropagation();
       removeExamDate(exam.id);
-      renderExamList();
+      renderExamCountdowns();
       showToast('Exam removed.', 'success');
     });
-
-    list.appendChild(row);
+    grid.appendChild(card);
   });
-
-  setTimeout(() => {
-    if (!wrap) return;
-    const firstUpcoming = list.querySelector('.exam-row:not(.er-past):not(.er-today)') ||
-                          list.querySelector('.exam-row.er-today');
-    if (firstUpcoming) wrap.scrollTop = Math.max(0, firstUpcoming.offsetTop - 12);
-  }, 80);
 }
 
 function updateExamTimers() {
-  const allExams = getExamDates();
-  const now      = new Date();
-  const today    = todayStr();
-  allExams.forEach(exam => {
-    const el = document.getElementById(`exam-days-${exam.id}`);
-    if (!el || exam.dateStr < today) return;
-    const diffMs  = new Date(exam.dateStr + 'T00:00:00') - now;
-    if (diffMs <= 0) return;
-    const days = Math.floor(diffMs / 86400000);
-    el.textContent = '(' + days + (days === 1 ? ' day' : ' days') + ')';
+  const exams = getUpcomingExamDates();
+  const now   = new Date();
+  exams.forEach(exam => {
+    const diffMs = Math.max(0, new Date(exam.dateStr + 'T00:00:00') - now);
+    const days   = Math.floor(diffMs / 86400000);
+    const hours  = Math.floor((diffMs % 86400000) / 3600000);
+    const mins   = Math.floor((diffMs % 3600000) / 60000);
+    const dEl = document.getElementById(`exam-days-${exam.id}`);
+    const hEl = document.getElementById(`exam-hm-${exam.id}`);
+    if (dEl) dEl.textContent = days;
+    if (hEl) hEl.textContent = String(hours).padStart(2,'0') + ':' + String(mins).padStart(2,'0');
   });
 }
 
@@ -181,7 +161,6 @@ function renderSubjects() {
   subjects.forEach((subj, idx) => {
     const palette = subjectPalettes[idx % subjectPalettes.length];
     const papers  = subj.papers || [];
-    const tasks   = (subj.tasks || []).filter(t => !t.completed);
     const avgPct  = papers.length ? Math.round(papers.reduce((s, p) => s + p.percentage, 0) / papers.length) : null;
 
     const card = document.createElement('div');
@@ -202,7 +181,6 @@ function renderSubjects() {
         <div class="subject-stat"><span class="subject-stat-value">${papers.length}</span><span class="subject-stat-label">Papers</span></div>
         ${avgPct !== null ? `<div class="subject-stat"><span class="subject-stat-value" style="color:${getGradeColor(calculateGrade(avgPct))}">${avgPct}%</span><span class="subject-stat-label">Avg</span></div>` : ''}
       </div>
-      ${tasks.length > 0 ? `<span class="subj-task-badge">\u2713 ${tasks.length} task${tasks.length !== 1 ? 's' : ''} pending</span>` : ''}
     `;
 
     card.addEventListener('click', e => {
@@ -318,12 +296,18 @@ function renderUpcomingTasks() {
   const allPending = getAllUpcomingTasks();
   container.innerHTML = '';
 
-  if (allPending.length === 0) { if (section) section.style.display = 'none'; return; }
+  if (allPending.length === 0) {
+    if (section) section.style.display = 'none';
+    return;
+  }
   if (section) section.style.display = '';
   if (countEl) countEl.textContent = allPending.length;
 
   const today   = todayStr();
-  const in3Days = (() => { const d = new Date(); d.setDate(d.getDate() + 3); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); })();
+  const in3Days = (() => {
+    const d = new Date(); d.setDate(d.getDate() + 3);
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  })();
 
   function dueRank(t) {
     if (!t.dueDate)           return 4;

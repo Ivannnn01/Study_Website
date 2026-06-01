@@ -1,4 +1,4 @@
-﻿.topnav {
+.topnav {
   position: sticky;
   top: 0;
   z-index: var(--z-nav);
@@ -106,6 +106,94 @@
   position: relative;
   z-index: 1;
 }
+
+.exam-section { margin-bottom: var(--space-2xl); }
+
+.exam-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+  gap: var(--space-md);
+}
+
+.exam-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg) var(--space-md) var(--space-md);
+  box-shadow: var(--neu-convex);
+  transition: all var(--transition-base);
+  position: relative;
+  text-align: center;
+  border-top: 3px solid var(--exam-accent, var(--primary));
+  overflow: hidden;
+}
+
+.exam-card:hover {
+  box-shadow: var(--neu-convex), 0 0 0 1px var(--exam-accent, rgba(108,99,255,0.3));
+  transform: translateY(-3px);
+}
+
+.exam-delete-btn {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.85rem;
+  line-height: 1;
+  opacity: 0;
+  transition: all var(--transition-fast);
+  padding: 2px 5px;
+  border-radius: var(--radius-sm);
+}
+.exam-card:hover .exam-delete-btn { opacity: 1; }
+.exam-delete-btn:hover { color: #EF4444; background: rgba(239,68,68,0.12); }
+
+.exam-card-name {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: var(--space-sm);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.exam-card-days {
+  font-size: 2.6rem;
+  font-weight: 800;
+  color: var(--exam-accent, var(--primary-light));
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.exam-card-days-lbl {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin: 3px 0 var(--space-xs);
+}
+
+.exam-card-hm {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.exam-empty-state {
+  padding: var(--space-lg) var(--space-xl);
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--neu-flat);
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+.exam-empty-state p { margin: 0; }
+.exam-empty-state strong { color: var(--text-secondary); }
 
 .section-header {
   display: flex;
@@ -380,90 +468,3 @@
   .exam-card-days { font-size: 2rem; }
   .exam-grid { grid-template-columns: repeat(3, 1fr); }
 }
-.exam-section { margin-bottom: var(--space-2xl); }
-
-.exam-list-wrap {
-  background: var(--bg-card);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--neu-convex);
-  max-height: 260px;
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(--border-subtle) transparent;
-}
-.exam-list-wrap::-webkit-scrollbar { width: 4px; }
-.exam-list-wrap::-webkit-scrollbar-thumb { background: var(--border-subtle); border-radius: 4px; }
-
-.exam-list { display: flex; flex-direction: column; }
-
-.exam-row {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  padding: 13px var(--space-lg);
-  border-bottom: 1px solid var(--border-subtle);
-  transition: background var(--transition-fast);
-  position: relative;
-}
-.exam-row:last-child { border-bottom: none; }
-.exam-row:hover { background: rgba(108,99,255,0.04); }
-.exam-row:hover .er-delete { opacity: 1; }
-
-.exam-row.er-past { opacity: 0.42; }
-
-.exam-row.er-today { background: rgba(108,99,255,0.07); }
-.exam-row.er-today::before {
-  content: '';
-  position: absolute;
-  left: 0; top: 0; bottom: 0;
-  width: 3px;
-  background: var(--primary);
-  border-radius: 0 2px 2px 0;
-}
-
-.er-name {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  flex: 1;
-  min-width: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.er-dash { color: var(--text-muted); font-size: 0.85rem; flex-shrink: 0; }
-
-.er-date { font-size: 0.85rem; color: var(--text-secondary); flex-shrink: 0; white-space: nowrap; }
-
-.er-days {
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: var(--exam-accent, var(--primary-light));
-  flex-shrink: 0;
-  white-space: nowrap;
-  min-width: 80px;
-  text-align: right;
-}
-
-.er-delete {
-  background: transparent;
-  border: none;
-  color: var(--text-muted);
-  cursor: pointer;
-  font-size: 0.8rem;
-  padding: 3px 6px;
-  border-radius: var(--radius-sm);
-  opacity: 0;
-  transition: all var(--transition-fast);
-  flex-shrink: 0;
-}
-.er-delete:hover { color: #EF4444; background: rgba(239,68,68,0.12); }
-
-.exam-empty-msg {
-  padding: var(--space-lg) var(--space-xl);
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  text-align: center;
-}
-.exam-empty-msg strong { color: var(--text-secondary); }
