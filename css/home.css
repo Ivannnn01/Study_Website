@@ -110,22 +110,23 @@
 .exam-section { margin-bottom: var(--space-2xl); }
 
 .exam-scroll-wrap {
-  max-height: 310px;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
   border-radius: var(--radius-lg);
   scrollbar-width: thin;
   scrollbar-color: var(--border-subtle) transparent;
-  padding-right: 2px;
+  padding-bottom: 6px;
 }
-.exam-scroll-wrap::-webkit-scrollbar { width: 4px; }
+.exam-scroll-wrap::-webkit-scrollbar { height: 4px; }
 .exam-scroll-wrap::-webkit-scrollbar-thumb { background: var(--border-subtle); border-radius: 4px; }
 .exam-scroll-wrap::-webkit-scrollbar-track { background: transparent; }
 
 .exam-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
   gap: var(--space-md);
+  padding-bottom: 2px;
 }
 
 .exam-card {
@@ -138,6 +139,8 @@
   text-align: center;
   border-top: 3px solid var(--exam-accent, var(--primary));
   overflow: hidden;
+  flex: 0 0 155px;
+  width: 155px;
 }
 
 .exam-card:hover {
@@ -251,10 +254,19 @@
 .subjects-section { margin-bottom: var(--space-2xl); }
 
 .subjects-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
   gap: var(--space-md);
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 6px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-subtle) transparent;
 }
+.subjects-grid::-webkit-scrollbar { height: 4px; }
+.subjects-grid::-webkit-scrollbar-thumb { background: var(--border-subtle); border-radius: 4px; }
+.subjects-grid::-webkit-scrollbar-track { background: transparent; }
 
 .subject-card {
   background: var(--bg-card);
@@ -266,6 +278,8 @@
   overflow: hidden;
   display: block;
   box-shadow: var(--neu-convex);
+  flex: 0 0 240px;
+  width: 240px;
 }
 
 .subject-card::before {
