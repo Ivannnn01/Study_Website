@@ -113,13 +113,10 @@
   overflow-x: auto;
   overflow-y: hidden;
   border-radius: var(--radius-lg);
-  scrollbar-width: thin;
-  scrollbar-color: var(--border-subtle) transparent;
+  scrollbar-width: none;
   padding-bottom: 6px;
 }
-.exam-scroll-wrap::-webkit-scrollbar { height: 4px; }
-.exam-scroll-wrap::-webkit-scrollbar-thumb { background: var(--border-subtle); border-radius: 4px; }
-.exam-scroll-wrap::-webkit-scrollbar-track { background: transparent; }
+.exam-scroll-wrap::-webkit-scrollbar { display: none; }
 
 .exam-grid {
   display: flex;
@@ -261,12 +258,9 @@
   overflow-x: auto;
   overflow-y: hidden;
   padding-bottom: 6px;
-  scrollbar-width: thin;
-  scrollbar-color: var(--border-subtle) transparent;
+  scrollbar-width: none;
 }
-.subjects-grid::-webkit-scrollbar { height: 4px; }
-.subjects-grid::-webkit-scrollbar-thumb { background: var(--border-subtle); border-radius: 4px; }
-.subjects-grid::-webkit-scrollbar-track { background: transparent; }
+.subjects-grid::-webkit-scrollbar { display: none; }
 
 .subject-card {
   background: var(--bg-card);
