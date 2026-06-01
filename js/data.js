@@ -1,4 +1,4 @@
-const DB_KEY = 'studyapp_data';
+﻿const DB_KEY = 'studyapp_data';
 
 function getData() {
   try {
@@ -226,20 +226,33 @@ function applyTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
 }
 
-function getExamConfig() {
-  return getData().examConfig || null;
+function getExamDates() {
+  const data = getData();
+  if (data.examConfig && !data.examDates) {
+    data.examDates = [{ id: 'migrated_' + Date.now(), name: data.examConfig.name, dateStr: data.examConfig.dateStr }];
+    delete data.examConfig;
+    saveData(data);
+  }
+  return data.examDates || [];
 }
 
-function setExamConfig(name, dateStr) {
+function addExamDate(name, dateStr) {
   const data = getData();
-  data.examConfig = { name: name.trim(), dateStr };
+  data.examDates = data.examDates || [];
+  data.examDates.push({ id: 'exam_' + Date.now() + '_' + Math.random().toString(36).slice(2,5), name: name.trim(), dateStr });
+  data.examDates.sort((a, b) => a.dateStr.localeCompare(b.dateStr));
   saveData(data);
 }
 
-function clearExamConfig() {
+function removeExamDate(id) {
   const data = getData();
-  delete data.examConfig;
+  data.examDates = (data.examDates || []).filter(e => e.id !== id);
   saveData(data);
+}
+
+function getUpcomingExamDates() {
+  const today = todayStr();
+  return getExamDates().filter(e => e.dateStr >= today).sort((a, b) => a.dateStr.localeCompare(b.dateStr)).slice(0, 6);
 }
 
 function todayStr() {
