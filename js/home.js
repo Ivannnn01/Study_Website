@@ -70,10 +70,90 @@ function initExamSystem() {
 
   document.getElementById('btn-cancel-exam').addEventListener('click', () => closeModal('modal-exam'));
 
+  const csvInput = document.getElementById('exam-csv-input');
+  document.getElementById('btn-import-exam-csv').addEventListener('click', () => csvInput.click());
+  csvInput.addEventListener('change', handleExamCSVImport);
+
   const nameIn = document.getElementById('input-exam-name');
   const dateIn = document.getElementById('input-exam-date');
   if (nameIn) nameIn.addEventListener('keydown', e => { if (e.key === 'Enter') dateIn.focus(); });
   if (dateIn) dateIn.addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('btn-save-exam').click(); });
+}
+
+function parseCSVLine(line) {
+  const cols = [];
+  let cur = '', inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') { inQ = !inQ; }
+    else if (ch === ',' && !inQ) { cols.push(cur.trim()); cur = ''; }
+    else { cur += ch; }
+  }
+  cols.push(cur.trim());
+  return cols;
+}
+
+function parseExamDate(raw) {
+  const s = raw.replace(/^"|"$/g, '').trim();
+  if (!s) return null;
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+
+  const dmy = s.match(/^(\d{1,2})[\-\/\.](\d{1,2})[\-\/\.](\d{4})$/);
+  if (dmy) return dmy[3] + '-' + dmy[2].padStart(2,'0') + '-' + dmy[1].padStart(2,'0');
+
+  const months = {
+    jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12,
+    january:1,february:2,march:3,april:4,june:6,july:7,august:8,
+    september:9,october:10,november:11,december:12
+  };
+  const dmyNamed = s.match(/^(\d{1,2})\s+([a-zA-Z]+)\s+(\d{4})$/);
+  if (dmyNamed) {
+    const m = months[dmyNamed[2].toLowerCase()];
+    if (m) return dmyNamed[3] + '-' + String(m).padStart(2,'0') + '-' + dmyNamed[1].padStart(2,'0');
+  }
+  const namedDmy = s.match(/^([a-zA-Z]+)\s+(\d{1,2})[,\s]+(\d{4})$/);
+  if (namedDmy) {
+    const m = months[namedDmy[1].toLowerCase()];
+    if (m) return namedDmy[3] + '-' + String(m).padStart(2,'0') + '-' + namedDmy[2].padStart(2,'0');
+  }
+
+  const d = new Date(s);
+  if (!isNaN(d.getTime())) {
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  }
+  return null;
+}
+
+function handleExamCSVImport(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const lines = ev.target.result.split(/\r?\n/).filter(l => l.trim());
+    let imported = 0, skipped = 0;
+    lines.forEach((line, idx) => {
+      const cols = parseCSVLine(line);
+      if (cols.length < 2) return;
+      const name    = cols[0].replace(/^"|"$/g, '').trim();
+      const rawDate = cols[1].replace(/^"|"$/g, '').trim();
+      if (idx === 0) {
+        const nl = name.toLowerCase(), dl = rawDate.toLowerCase();
+        if (nl === 'name' || nl === 'exam name' || nl === 'exam' || dl === 'date' || dl === 'exam date') return;
+      }
+      if (!name) return;
+      const dateStr = parseExamDate(rawDate);
+      if (!dateStr) { skipped++; return; }
+      addExamDate(name, dateStr);
+      imported++;
+    });
+    e.target.value = '';
+    renderExamCountdowns();
+    if (imported > 0) showToast('\uD83D\uDCC5 Imported ' + imported + ' exam' + (imported !== 1 ? 's' : '') + '!', 'success');
+    if (skipped  > 0) showToast(skipped + ' row' + (skipped !== 1 ? 's' : '') + ' had unreadable dates and were skipped.', 'error');
+    if (imported === 0 && skipped === 0) showToast('No valid exam rows found in the CSV.', 'error');
+  };
+  reader.readAsText(file);
 }
 
 function urgencyColor(daysLeft) {

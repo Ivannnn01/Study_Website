@@ -46,10 +46,17 @@
           <h2 id="exam-heading">Exam Countdown</h2>
           <span class="section-badge" id="exam-count">0</span>
         </div>
-        <button class="btn btn-primary btn-sm" id="btn-add-exam" type="button">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Add Exam
-        </button>
+        <div style="display:flex;gap:var(--space-sm);align-items:center;flex-wrap:wrap">
+          <input type="file" id="exam-csv-input" accept=".csv,.txt" style="display:none" />
+          <button class="btn btn-secondary btn-sm" id="btn-import-exam-csv" type="button" title="Import exam dates from a CSV file">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Import CSV
+          </button>
+          <button class="btn btn-primary btn-sm" id="btn-add-exam" type="button">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Exam
+          </button>
+        </div>
       </div>
       <div class="exam-grid" id="exam-grid"></div>
     </section>
