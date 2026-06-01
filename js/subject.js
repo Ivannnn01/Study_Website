@@ -75,6 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (tabId === 'papers')      renderPapers();
     if (tabId === 'leaderboard') isGP ? renderTopicsDone() : renderLeaderboard();
     if (tabId === 'tasks')       renderTasks();
+    if (tabId === 'linkhub')     renderLinkHub();
   }
 
   tabBtns.forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.tab)));
@@ -594,10 +595,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function renderTasks() {
     refreshSubject();
-    const tasks      = getTasksForSubject(subjectId);
-    const pending    = tasks.filter(t => !t.completed);
-    const completed  = tasks.filter(t => t.completed);
-    const container  = document.getElementById('task-list-container');
+    const tasks     = getTasksForSubject(subjectId);
+    const pending   = tasks.filter(t => !t.completed);
+    const completed = tasks.filter(t => t.completed);
+    const container = document.getElementById('task-list-container');
     if (!container) return;
     container.innerHTML = '';
 
@@ -605,10 +606,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const in3Days = (() => { const d = new Date(); d.setDate(d.getDate() + 3); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); })();
 
     function getDueClass(dueDate) {
-      if (!dueDate) return 'due-later';
-      if (dueDate < today)        return 'due-overdue';
-      if (dueDate === today)      return 'due-today';
-      if (dueDate <= in3Days)     return 'due-soon';
+      if (!dueDate)            return 'due-later';
+      if (dueDate < today)     return 'due-overdue';
+      if (dueDate === today)   return 'due-today';
+      if (dueDate <= in3Days)  return 'due-soon';
       return 'due-later';
     }
     function getDueLabel(dueDate) {
@@ -625,6 +626,11 @@ document.addEventListener('DOMContentLoaded', () => {
       item.style.animationDelay = `${idx * 0.04}s`;
       const dueClass = getDueClass(task.dueDate);
       const dueLabel = getDueLabel(task.dueDate);
+      const linkBtn = task.url
+        ? `<button class="task-link-btn" title="Open link: ${escapeHtml(task.url)}" data-url="${escapeHtml(task.url)}">
+             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+           </button>`
+        : '';
       item.innerHTML = `
         <div class="task-checkbox" title="${task.completed ? 'Mark incomplete' : 'Mark complete'}">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
@@ -633,6 +639,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="task-title">${escapeHtml(task.title)}</div>
         </div>
         ${dueLabel ? `<span class="task-due ${dueClass}">${dueLabel}</span>` : ''}
+        ${linkBtn}
         <button class="task-delete-btn" title="Remove task">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
         </button>
@@ -647,6 +654,11 @@ document.addEventListener('DOMContentLoaded', () => {
         renderTasks();
         updateMetaChips();
         showToast('Task removed.', 'success');
+      });
+      const lb = item.querySelector('.task-link-btn');
+      if (lb) lb.addEventListener('click', e => {
+        e.stopPropagation();
+        window.open(lb.dataset.url, '_blank', 'noopener');
       });
       return item;
     }
@@ -665,7 +677,6 @@ document.addEventListener('DOMContentLoaded', () => {
       divider.className = 'tasks-completed-divider';
       divider.textContent = `Completed (${completed.length})`;
       container.appendChild(divider);
-
       const completedList = document.createElement('div');
       completedList.className = 'task-list';
       completed.forEach((t, i) => completedList.appendChild(createTaskEl(t, i)));
@@ -675,8 +686,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const addRow = document.createElement('div');
     addRow.className = 'add-task-row';
     addRow.innerHTML = `
-      <input type="text" id="add-task-title" placeholder="New task\u2026" style="flex:1">
+      <input type="text" id="add-task-title" placeholder="New task\u2026">
       <input type="date" id="add-task-due" title="Due date (optional)">
+      <input type="url" id="add-task-url" placeholder="Link (optional)" title="Optional link URL">
       <button class="btn btn-primary btn-sm" id="btn-add-task">
         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Add
@@ -686,19 +698,105 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const titleIn = addRow.querySelector('#add-task-title');
     const dueIn   = addRow.querySelector('#add-task-due');
+    const urlIn   = addRow.querySelector('#add-task-url');
     const addBtn  = addRow.querySelector('#btn-add-task');
 
     const doAdd = () => {
       const title = titleIn.value.trim();
       if (!title) { showToast('Please enter a task title.', 'error'); titleIn.focus(); return; }
-      addTask(subjectId, title, dueIn.value || null);
+      addTask(subjectId, title, dueIn.value || null, urlIn.value.trim() || null);
       renderTasks();
       updateMetaChips();
       showToast('Task added!', 'success');
     };
 
     addBtn.addEventListener('click', doAdd);
-    titleIn.addEventListener('keydown', e => { if (e.key === 'Enter') doAdd(); });
+    titleIn.addEventListener('keydown', e => { if (e.key === 'Enter') dueIn.focus(); });
+    dueIn.addEventListener('keydown',   e => { if (e.key === 'Enter') urlIn.focus(); });
+    urlIn.addEventListener('keydown',   e => { if (e.key === 'Enter') doAdd(); });
+  }
+
+  function renderLinkHub() {
+    refreshSubject();
+    const links    = getSubjectLinks(subjectId);
+    const container = document.getElementById('linkhub-list-container');
+    if (!container) return;
+    container.innerHTML = '';
+
+    if (links.length === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'empty-state';
+      empty.innerHTML = `<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg><p>No links yet. Add your first link below.</p>`;
+      container.appendChild(empty);
+    }
+
+    const list = document.createElement('div');
+    list.className = 'linkhub-list';
+
+    links.forEach((lnk, idx) => {
+      const row = document.createElement('div');
+      row.className = 'linkhub-row';
+      row.style.animation = `fadeInUp 0.3s ease ${idx * 0.05}s both`;
+      let displayUrl = lnk.url;
+      try { displayUrl = new URL(lnk.url).hostname; } catch {}
+      row.innerHTML = `
+        <div class="linkhub-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        </div>
+        <div class="linkhub-info">
+          <span class="linkhub-name">${escapeHtml(lnk.name)}</span>
+          <span class="linkhub-url">${escapeHtml(displayUrl)}</span>
+        </div>
+        <div class="linkhub-actions">
+          <button class="chapter-btn delete linkhub-delete-btn" title="Remove link">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+          </button>
+        </div>
+      `;
+      row.addEventListener('click', e => {
+        if (e.target.closest('.linkhub-delete-btn')) return;
+        window.open(lnk.url, '_blank', 'noopener');
+      });
+      row.querySelector('.linkhub-delete-btn').addEventListener('click', e => {
+        e.stopPropagation();
+        removeSubjectLink(subjectId, lnk.id);
+        renderLinkHub();
+        showToast('Link removed.', 'success');
+      });
+      list.appendChild(row);
+    });
+
+    container.appendChild(list);
+
+    const addRow = document.createElement('div');
+    addRow.className = 'add-chapter-row';
+    addRow.innerHTML = `
+      <input type="text" id="add-link-name" placeholder="Link name" style="flex:1">
+      <input type="url" id="add-link-url" placeholder="https://..." style="flex:2">
+      <button class="btn btn-primary btn-sm" id="btn-add-link">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add
+      </button>
+    `;
+    container.appendChild(addRow);
+
+    const nameIn = addRow.querySelector('#add-link-name');
+    const urlIn  = addRow.querySelector('#add-link-url');
+    const addBtn = addRow.querySelector('#btn-add-link');
+
+    const doAdd = () => {
+      const name = nameIn.value.trim();
+      const url  = urlIn.value.trim();
+      if (!name) { showToast('Please enter a link name.', 'error');  nameIn.focus(); return; }
+      if (!url)  { showToast('Please enter a URL.', 'error');        urlIn.focus();  return; }
+      addSubjectLink(subjectId, name, url);
+      renderLinkHub();
+      showToast(`"${name}" added!`, 'success');
+    };
+
+    addBtn.addEventListener('click', doAdd);
+    nameIn.addEventListener('keydown', e => { if (e.key === 'Enter') urlIn.focus(); });
+    urlIn.addEventListener('keydown',  e => { if (e.key === 'Enter') doAdd(); });
   }
 
   refreshSubject();

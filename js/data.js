@@ -31,6 +31,7 @@ function addSubject(name, icon) {
     chapters: [],
     papers: [],
     tasks: [],
+    links: [],
     created: Date.now()
   };
   subjects.push(subject);
@@ -313,7 +314,7 @@ function checkStreakValidity() {
   }
 }
 
-function addTask(subjectId, title, dueDateStr) {
+function addTask(subjectId, title, dueDateStr, url) {
   const subjects = getSubjects();
   const idx = subjects.findIndex(s => s.id === subjectId);
   if (idx === -1) return null;
@@ -322,12 +323,42 @@ function addTask(subjectId, title, dueDateStr) {
     id: 'task_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
     title: title.trim(),
     dueDate: dueDateStr || null,
+    url: url ? normalizeUrl(url) : null,
     completed: false,
     created: Date.now()
   };
   subjects[idx].tasks.push(task);
   saveSubjects(subjects);
   return task;
+}
+
+function addSubjectLink(subjectId, name, url) {
+  const subjects = getSubjects();
+  const idx = subjects.findIndex(s => s.id === subjectId);
+  if (idx === -1) return null;
+  subjects[idx].links = subjects[idx].links || [];
+  const link = {
+    id: 'lnk_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
+    name: name.trim(),
+    url: normalizeUrl(url),
+    created: Date.now()
+  };
+  subjects[idx].links.push(link);
+  saveSubjects(subjects);
+  return link;
+}
+
+function removeSubjectLink(subjectId, linkId) {
+  const subjects = getSubjects();
+  const idx = subjects.findIndex(s => s.id === subjectId);
+  if (idx === -1) return;
+  subjects[idx].links = (subjects[idx].links || []).filter(l => l.id !== linkId);
+  saveSubjects(subjects);
+}
+
+function getSubjectLinks(subjectId) {
+  const subject = getSubject(subjectId);
+  return subject ? (subject.links || []) : [];
 }
 
 function toggleTask(subjectId, taskId) {
